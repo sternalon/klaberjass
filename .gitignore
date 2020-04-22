@@ -1,0 +1,10 @@
+venv
+venv/*
+
+db.sqlite3
+
+.idea/*
+
+*.pyc
+*/*.pyc
+*/*/*.pyc
