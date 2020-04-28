@@ -33,12 +33,15 @@ class Game(models.Model):
             Player.objects.get_or_create(user=user, game=self, position = position)
 
     def get_players(self):
-        return [player for player in Player.objects.filter(game=self).order_by('position')]
+        return list(Player.objects.filter(game=self).order_by('position'))
+
 
     def _deal(self):
-        deck = GameConfig(self.name).deck
+        config = GameConfig(self.name)
+        deck = config.deck
         hands = deck.deal()
         self._assign_cards(hands)
+        self._create_tricks(config.num_tricks)
 
     def _assign_cards(self, hands):
         players = self.get_players()
@@ -47,6 +50,13 @@ class Game(models.Model):
         for k in range(len(players)):
             for card in hands[k]:
                 PlayingCard.objects.create(card= card, game=self, player=players[k])
+
+    def _create_tricks(self, num_tricks):
+        for k in range(num_tricks):
+            Trick.objects.create(game=self, number=k+1)
+
+    def get_tricks(self):
+        return list(Trick.objects.filter(game=self).order_by('number'))
 
 
 class Player(models.Model):
@@ -86,6 +96,11 @@ class CardField(models.PositiveIntegerField):
     # def get_prep_value(self, value):
     #     return ???
 
+class Trick(models.Model):
+    game = models.ForeignKey(Game, on_delete=models.CASCADE)
+    # lead = models.ForeignKey(Player, on_delete=models.CASCADE, related_name="lead")
+    winner = models.ForeignKey(Player, on_delete=models.CASCADE, null = True)
+    number = models.SmallIntegerField()
 
 
 class PlayingCard(models.Model):
@@ -93,28 +108,17 @@ class PlayingCard(models.Model):
     played = models.BooleanField(default=False)
     game = models.ForeignKey(Game, on_delete=models.CASCADE)
     player = models.ForeignKey(Player, on_delete=models.CASCADE)
+    trick = models.ForeignKey(Trick, on_delete=models.SET_NULL, null=True)
 
     class Meta:
         unique_together = ('card', 'game',)
 
 
-# class Trick(models.Model):
-#     game = models.ForeignKey(Game)
-#     card1 = models.ForeignKey(PlayingCard)
-#     card2 = models.ForeignKey(PlayingCard)
-#     card3 = models.ForeignKey(PlayingCard)
-#     card4 = models.ForeignKey(PlayingCard)
-#     lead = models.ForeignKey(User)
-#     winner = models.ForeignKey(User)
-#     number = models.SmallIntegerField()
-#
 # class Set(models.Model):
-#     player1 = models.ForeignKey(User)
-#     player2 = models.ForeignKey(User)
-#     player3 = models.ForeignKey(User)
-#     player4 = models.ForeignKey(User)
-#
-#
+#     player1 = models.ForeignKey(Player)
+#     player2 = models.ForeignKey(Player)
+#     player3 = models.ForeignKey(Player)
+#     player4 = models.ForeignKey(Player)
 #     score1 = models.IntegerField()
 #     score2 = models.IntegerField()
 #
