@@ -7,6 +7,7 @@ class GameConfig():
         self.name = name
         self.deck_type = "split"
         self.num_players = 4
+        self.num_tricks = 8
         self.deck = CardDeck(self.deck_type, self.num_players)
 
 

@@ -1,7 +1,7 @@
 from django.test import TestCase
 
 from django.contrib.auth.models import User
-from ..models import PlayingCard, Game, Player
+from ..models import PlayingCard, Game, Player, Trick
 from ..utils import Card, GameConfig
 
 class TestCreateJassGame(TestCase):
@@ -29,7 +29,7 @@ class TestCreateJassGame(TestCase):
         game.save()
         game._set_players(users)
 
-        players = [player for player in Player.objects.filter(game=game).order_by('position')]
+        players = list(Player.objects.filter(game=game).order_by('position'))
         self.assertIs(len(set(players)), 4)
         self.assertEqual(players, game.get_players())
 
@@ -69,9 +69,10 @@ class TestCreateJassGame(TestCase):
         """
         Test PlayingCard Model
         """
+        config = GameConfig("klabberjass")
         users = [self.user_1, self.user_2, self.user_3, self.user_4]
 
-        game = Game(name = "klabberjass")
+        game = Game(name=config.name)
         game.save()
         game._set_players(users)
         game._deal()
@@ -81,13 +82,20 @@ class TestCreateJassGame(TestCase):
         players = game.get_players()
         for player in players:
             hand = player.get_hand()
-            self.assertEqual(len(set(hand)), 8)
+            self.assertEqual(len(set(hand)), config.num_tricks)
             cards.extend(hand)
-        self.assertEqual(len(set(cards)), 32)
-        self.assertEqual(set([card.card.as_number() for card in cards]), set(card.as_number() for card in GameConfig(game.name).deck.cards) )
+        self.assertEqual(len(set(cards)), len(config.deck.cards))
+        self.assertEqual(set([card.card.as_number() for card in cards]), set(card.as_number() for card in config.deck.cards) )
 
         # Check one cards:
         playing_card = cards[0]
         self.assertEqual(playing_card.played, False)
         self.assertEqual(playing_card.game, game)
         self.assertEqual(type(playing_card.card), type(Card(number="five", suit="club")))
+
+        # Check that tricks have been created
+        tricks = list(Trick.objects.filter(game=game).order_by('number'))
+        self.assertEqual(tricks, game.get_tricks())
+        self.assertEqual(len(tricks), config.num_tricks)
+        self.assertEqual(set([trick.number for trick in tricks]), set(list(range(1,config.num_tricks+1))))
+
