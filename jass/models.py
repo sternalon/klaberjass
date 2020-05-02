@@ -5,16 +5,20 @@ from .utils import GameConfig
 
 # Create your models here.
 
+class Series(models.Model):
+    score1 = models.IntegerField(default=0)
+    score2 = models.IntegerField(default=0)
+    completed = models.BooleanField(default=False)
 
 class Game(models.Model):
     KLABBERJASS = 'klabberjass'
     GAMES = [(KLABBERJASS, 'Klabberjass')]
-    #
+    SUITS = [("spade", 'Spade'), ("heart", 'Heart'), ("diamond", 'Diamond'), ("club", 'Club')]
+
     name = models.CharField(choices=GAMES, default=KLABBERJASS, max_length=12)
     completed = models.BooleanField(default=False)
-    # series = models.ForeignKey(Series)
-
-    # dates
+    series = models.ForeignKey(Series, on_delete=models.CASCADE, null=True)
+    trumps = models.CharField(choices=SUITS, max_length=7)
     created = models.DateTimeField(auto_now_add=True)
     modified = models.DateTimeField(auto_now=True)
 
@@ -114,14 +118,12 @@ class PlayingCard(models.Model):
         unique_together = ('card', 'game',)
 
 
-# class Set(models.Model):
-#     player1 = models.ForeignKey(Player)
-#     player2 = models.ForeignKey(Player)
-#     player3 = models.ForeignKey(Player)
-#     player4 = models.ForeignKey(Player)
-#     score1 = models.IntegerField()
-#     score2 = models.IntegerField()
-#
+class Bid(models.Model):
+    SUITS = [("spade", 'Spade'), ("heart", 'Heart'), ("diamond", 'Diamond'), ("club", 'Club')]
+    game = models.ForeignKey(Game, on_delete=models.CASCADE)
+    player = models.ForeignKey(Player, on_delete=models.CASCADE)
+    play = models.BooleanField()
+    suit = models.CharField(choices=SUITS, max_length=7)
 
 
 
