@@ -99,3 +99,6 @@ class TestCreateJassGame(TestCase):
         self.assertEqual(len(tricks), config.num_tricks)
         self.assertEqual(set([trick.number for trick in tricks]), set(list(range(1,config.num_tricks+1))))
 
+        #Card and trick together
+        self.assertTrue(playing_card._validate_game(tricks[0]))
+        self.assertTrue(playing_card._not_played())
