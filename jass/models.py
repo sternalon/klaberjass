@@ -62,6 +62,13 @@ class Game(models.Model):
     def get_tricks(self):
         return list(Trick.objects.filter(game=self).order_by('number'))
 
+    def get_current_trick(self):
+        open_tricks = Trick.objects.filter(game=self, winner = None).order_by('number')
+        if len(open_tricks)>0:
+            return open_tricks[0]
+        else:
+            return None
+
 
 class Player(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE)
@@ -111,19 +118,28 @@ class Trick(models.Model):
     def to_play(self):
         lead_position = self.lead().position
         num_cards_in_trick = len(self.cards())
-        return (lead_position + num_cards_in_trick) - (((lead_position + num_cards_in_trick) > 4) * 4)
+        position = self.mod_num_player(lead_position + num_cards_in_trick)
+        return Player.objects.get(game = self.game, position = position)
+
+    def mod_num_player(self, number):
+        num_players = len(self.game.get_players())
+        if number > num_players:
+            number = number - num_players
+        return number
 
     def cards(self):
-        return PlayingCard.objects.filter(trick=self.game)
+        return PlayingCard.objects.filter(trick=self).order_by('order_in_trick')
+
+    def num_cards_played(self):
+        return len(self.cards())
 
     def lead(self):
         if self.number == 1:
             # TODO: currently set up that player 1 leads. This could be done differently.
             return Player.objects.get(game=self.game, position = 1)
         else:
-            previous_trick = Trick.objects.get(game=self, number = self.number -1)
+            previous_trick = Trick.objects.get(game=self.game, number = self.number -1)
             return previous_trick.winner
-
 
 
 
@@ -133,9 +149,20 @@ class PlayingCard(models.Model):
     game = models.ForeignKey(Game, on_delete=models.CASCADE)
     player = models.ForeignKey(Player, on_delete=models.CASCADE)
     trick = models.ForeignKey(Trick, on_delete=models.SET_NULL, null=True)
+    order_in_trick = models.SmallIntegerField(null=True)
 
     class Meta:
         unique_together = ('card', 'game',)
+
+
+    def play(self, trick):
+        valid, message = self.valid_play(trick)
+        if valid:
+            self.trick = trick
+            self.order_in_trick = trick.num_cards_played() + 1
+            self.played = True
+            self.save()
+        return valid, message
 
 
     def valid_play(self, trick):
@@ -143,7 +170,7 @@ class PlayingCard(models.Model):
         if not self._validate_game(trick):
             message = "Invalid Play: Card belongs to incorrect game"
             return False, message
-        if not self._not_played(trick):
+        if not self._not_played():
             message = "Invalid Play: Card has already been played"
             return False, message
         if not self._validate_turn(trick):
@@ -163,13 +190,13 @@ class PlayingCard(models.Model):
         return (not self.played)
 
     def _validate_turn(self, trick):
-        player_position = self.player.position
-        turn_position = trick.to_play()
+        return self.player == trick.to_play()
+
         return (player_position==turn_position)
 
-    def _validate_card(self):
+    def _validate_card(self, card, hand):
         # TODO: Implement actual Jass rules.?
-        return True, "Success"
+        return True , "Success"
 
 
 
