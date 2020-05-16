@@ -116,7 +116,7 @@ class JassRules():
     def get_leading_suit(self):
         # TODO: A trick has a leading suit not the rules
         """Returns leading suit of the trick"""
-        return self.trick[0].suit
+        return self.trick[0].suit if self.trick else None
 
     def get_void(self, suit):
         # TODO: A hand should be void, not the rules
@@ -147,8 +147,7 @@ class JassRules():
         rank_dict = self.get_rank_dict(trumps=True)
         trumps = [card for card in self.get_trumps(cards)]
         ranks = [rank_dict.get(trump.number) for trump in trumps]
-        return trumps[ranks.index(max(ranks))]
-
+        return trumps[ranks.index(max(ranks))] if ranks else None
 
     def can_overtrump(self):
         """Returns true if hand has a higher trump than the top trump in the trick"""
@@ -156,6 +155,7 @@ class JassRules():
 
     def validate_play(self, card):
         """Returns whether card can be legally played"""
+
         if not self.rule_leading_suit(card):
             message = "Illegal move: you must play the leading suit."
             return False, message
@@ -167,23 +167,26 @@ class JassRules():
             return False, message
         else:
             message = "Success"
-            return True , message
+            return True, message
 
     def rule_leading_suit(self, card):
         """Player must play leading suit if they can"""
-        if not self.void:
-            return card.suit == self.leading_suit
+        if self.trick:
+            if not self.void:
+                return card.suit == self.leading_suit
         return True
 
 
     def rule_must_trump(self, card):
         """If player is void, they must play trump if they can (unless they can't overtrump)"""
-        if self.void and self.can_overtrump():
-            return self.is_trump(card)
+        if self.trick:
+            if self.void and self.can_overtrump():
+                return self.is_trump(card)
         return True
 
     def rule_overtrump(self, card):
         """Player must play over trump when trumps are lead or if they are void"""
-        if ((self.trump == self.leading_suit) or self.void) and self.can_overtrump():
-            return self.is_over_trump(card)
+        if self.trick:
+            if ((self.trump == self.leading_suit) or self.void) and self.can_overtrump():
+                return self.is_over_trump(card)
         return True

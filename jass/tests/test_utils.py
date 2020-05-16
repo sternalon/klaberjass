@@ -229,3 +229,20 @@ class JassRulesTest(TestCase):
         valid, message = rules.validate_play(self.queen_hearts)
         self.assertTrue(valid)
         self.assertEqual(message, "Success")
+
+    def test_play_first_cards(self):
+        """
+        Test that a player can play any card when leading .
+        Player can play any card (ie: can play a trump or discard)
+        """
+        hand = [self.ace_spades, self.queen_hearts]
+        trick = []
+        rules = JassRules(hand, trick, trump="heart")
+
+        valid, message = rules.validate_play(self.ace_spades)
+        self.assertTrue(valid)
+        self.assertEqual(message, "Success")
+
+        valid, message = rules.validate_play(self.queen_hearts)
+        self.assertTrue(valid)
+        self.assertEqual(message, "Success")
