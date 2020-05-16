@@ -78,3 +78,112 @@ class CardDeck():
         num_cards = len(self.cards)
         num_hand = int(num_cards/self.num_players)
         return [self.cards[i: i + num_hand] for i in range(0, num_cards, num_hand)]
+
+
+class JassRules():
+    rank = {"seven": 1, "eight": 2, "nine": 3, "jack": 4, "queen": 5, "king": 6, "ten": 7,  "ace": 8}
+    trump_rank = {"seven": 11, "eight": 12, "queen": 13, "king": 14, "ten": 15,  "ace": 16, "nine": 17, "jack": 18}
+    value = {"seven": 0, "eight": 0, "nine": 0, "jack": 2, "queen": 3, "king": 4, "ten": 10, "ace": 11}
+    trump_value = {"seven": 0, "eight": 0, "queen": 3, "king": 4, "ten": 10, "ace": 11, "nine": 14, "jack": 20}
+
+    def __init__(self, hand, trick, trump):
+        self.hand = hand
+        self.trick = trick
+        self.trump = trump
+        self.leading_suit = self.get_leading_suit()
+        self.void = self.get_void(self.leading_suit)
+        self.trick_trump = self.get_top_trump(self.trick)
+        self.hand_trump = self.get_top_trump(self.hand)
+
+    def get_rank_dict(self, trumps):
+        if trumps:
+            return JassRules.trump_rank
+        else:
+            return JassRules.rank
+
+    def card_rank(self, card):
+        """Returns card order for calculating which card is best"""
+        rank_dict = self.get_rank_dict(self.is_trump(card))
+        return rank_dict.get(card.number, 0)
+
+    def card_value(self, card):
+        """Returns card value used for adding score"""
+        if self.is_trump(card):
+            return JassRules.trump_value[card.number]
+        else:
+            return JassRules.value[card.number]
+
+    def get_leading_suit(self):
+        # TODO: A trick has a leading suit not the rules
+        """Returns leading suit of the trick"""
+        return self.trick[0].suit
+
+    def get_void(self, suit):
+        # TODO: A hand should be void, not the rules
+        """Returns whether the hand is void in suit"""
+        return not any([card.suit == suit for card in self.hand])
+
+    def is_trump(self, card):
+        """Returns whether the card is a trump"""
+        return card.suit == self.trump
+
+    def is_better(self, card1, card2):
+        """Returns whether the card1 beats card2"""
+        return self.card_rank(card1) > self.card_rank(card2)
+
+    def is_over_trump(self, card):
+        # TODO: Needs to be tested
+        """Returns whether card is an over trump (False if card is not a trump. True if no trumps in trick)"""
+        return self.is_trump(card) and self.is_better(card, self.trick_trump)
+
+    def get_trumps(self, cards):
+        # TODO: Could be generalized to get suit
+        """Returns list of trumps from list of cards"""
+        return [card for card in cards if self.is_trump(card)]
+
+    def get_top_trump(self, cards):
+        # TODO: Could be generalized to get any suit suit
+        """Returns top trump from list of cards (None otherwise)"""
+        rank_dict = self.get_rank_dict(trumps=True)
+        trumps = [card for card in self.get_trumps(cards)]
+        ranks = [rank_dict.get(trump.number) for trump in trumps]
+        return trumps[ranks.index(max(ranks))]
+
+
+    def can_overtrump(self):
+        """Returns true if hand has a higher trump than the top trump in the trick"""
+        return self.is_better(self.hand_trump, self.trick_trump)
+
+    def validate_play(self, card):
+        """Returns whether card can be legally played"""
+        if not self.rule_leading_suit(card):
+            message = "Illegal move: you must play the leading suit."
+            return False, message
+        elif not self.rule_must_trump(card):
+            message = "Illegal move: you must trump if you can."
+            return False, message
+        elif not self.rule_overtrump(card):
+            message = "Illegal move: must over trump if you can"
+            return False, message
+        else:
+            message = "Success"
+            return True , message
+
+    def rule_leading_suit(self, card):
+        """Player must play leading suit if they can"""
+        if not self.void:
+            return card.suit == self.leading_suit
+        return True
+
+
+    def rule_must_trump(self, card):
+        """If player is void, they must play trump if they can (unless they can't overtrump)"""
+        if self.void and self.can_overtrump():
+            return self.is_trump(card)
+        return True
+
+    def rule_overtrump(self, card):
+        """Player must play over trump when trumps are lead or if they are void"""
+        if ((self.trump == self.leading_suit) or self.void) and self.can_overtrump():
+            return self.is_over_trump(card)
+        return True
