@@ -152,6 +152,7 @@ class JassRulesTest(TestCase):
         hand = [self.ace_spades, self.jack_spades, self.ace_hearts, self.queen_hearts]
         trick = [self.king_spades, self.king_hearts]
         rules = JassRules(hand, trick, trump="heart")
+        self.assertEqual(set(rules.legal_cards), set([self.ace_spades, self.jack_spades]))
 
         valid , message = rules.validate_play(self.ace_spades)
         self.assertTrue(valid)
@@ -178,8 +179,8 @@ class JassRulesTest(TestCase):
         hand = [self.ace_spades, self.jack_hearts, self.queen_hearts]
         trick = [self.ace_hearts, self.king_hearts]
         rules = JassRules(hand, trick, trump="heart")
+        self.assertEqual(set(rules.legal_cards), set([self.jack_hearts]))
 
-        # Testing validate Play - leading card ace_hearts (trumps
         valid , message = rules.validate_play(self.ace_spades)
         self.assertFalse(valid)
         self.assertEqual(message, "Illegal move: you must play the leading suit.")
@@ -200,6 +201,7 @@ class JassRulesTest(TestCase):
         hand = [self.ace_spades, self.jack_hearts, self.queen_hearts]
         trick = [self.ace_clubs, self.king_hearts]
         rules = JassRules(hand, trick, trump="heart")
+        self.assertEqual(set(rules.legal_cards), set([self.jack_hearts]))
 
         valid, message = rules.validate_play(self.ace_spades)
         self.assertFalse(valid)
@@ -221,6 +223,7 @@ class JassRulesTest(TestCase):
         hand = [self.ace_spades, self.queen_hearts]
         trick = [self.ace_clubs, self.king_hearts]
         rules = JassRules(hand, trick, trump="heart")
+        self.assertEqual(set(rules.legal_cards), set([self.ace_spades, self.queen_hearts]))
 
         valid, message = rules.validate_play(self.ace_spades)
         self.assertTrue(valid)
@@ -238,6 +241,7 @@ class JassRulesTest(TestCase):
         hand = [self.ace_spades, self.queen_hearts]
         trick = []
         rules = JassRules(hand, trick, trump="heart")
+        self.assertEqual(set(rules.legal_cards), set([self.ace_spades, self.queen_hearts]))
 
         valid, message = rules.validate_play(self.ace_spades)
         self.assertTrue(valid)

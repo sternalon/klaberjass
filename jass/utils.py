@@ -94,6 +94,7 @@ class JassRules():
         self.void = self.get_void(self.leading_suit)
         self.trick_trump = self.get_top_trump(self.trick)
         self.hand_trump = self.get_top_trump(self.hand)
+        self.legal_cards = self.get_legal_cards()
 
     def get_rank_dict(self, trumps):
         if trumps:
@@ -152,6 +153,9 @@ class JassRules():
     def can_overtrump(self):
         """Returns true if hand has a higher trump than the top trump in the trick"""
         return self.is_better(self.hand_trump, self.trick_trump)
+
+    def get_legal_cards(self):
+        return [card for card in self.hand if self.validate_play(card)[0] is True]
 
     def validate_play(self, card):
         """Returns whether card can be legally played"""
