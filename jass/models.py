@@ -69,6 +69,11 @@ class Game(models.Model):
         else:
             return None
 
+    def get_rules(self):
+        config = GameConfig(self.name)
+        return config.rules
+
+
 
 class Player(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE)
@@ -79,8 +84,18 @@ class Player(models.Model):
         return list(PlayingCard.objects.filter(game=self.game, player=self))
 
     def get_unplayed_hand(self):
-        return list(PlayingCard.objects.filter(game=self.game, player=self, played=False ))
+        return list(PlayingCard.objects.filter(game=self.game, player=self, played=False))
 
+    def get_turn(self, trick):
+        """Returns a class that checks how the rules of the game apply to the particular hand/trick"""
+        rules = self.game.get_rules()
+        hand = [card.card for card in self.get_unplayed_hand()]
+        trick_cards = [card.card for card in trick.get_playing_cards()]
+        trump = self.game.trumps
+        return rules(hand, trick_cards, trump)
+
+    def get_legal(self):
+        return self.get_turn.legal_cards
 
 class CardField(models.PositiveIntegerField):
 
@@ -117,7 +132,7 @@ class Trick(models.Model):
 
     def to_play(self):
         lead_position = self.lead().position
-        num_cards_in_trick = len(self.cards())
+        num_cards_in_trick = len(self.get_playing_cards())
         position = self.mod_num_player(lead_position + num_cards_in_trick)
         return Player.objects.get(game = self.game, position = position)
 
@@ -127,11 +142,11 @@ class Trick(models.Model):
             number = number - num_players
         return number
 
-    def cards(self):
-        return PlayingCard.objects.filter(trick=self).order_by('order_in_trick')
+    def get_playing_cards(self):
+        return list(PlayingCard.objects.filter(trick=self).order_by('order_in_trick'))
 
     def num_cards_played(self):
-        return len(self.cards())
+        return len(self.get_playing_cards())
 
     def lead(self):
         if self.number == 1:
@@ -177,10 +192,7 @@ class PlayingCard(models.Model):
             message = "Invalid Play: Card played in incorrect order"
             return False, message
 
-        card = self.card
-        hand = self.player.get_unplayed_hand()
-        # valid , message = game.Rules.valid_play(playing_card.card, )
-        return self._validate_card(card, hand)
+        return self._validate_play(trick)
 
 
     def _validate_game(self, trick):
@@ -192,12 +204,9 @@ class PlayingCard(models.Model):
     def _validate_turn(self, trick):
         return self.player == trick.to_play()
 
-        return (player_position==turn_position)
-
-    def _validate_card(self, card, hand):
-        # TODO: Implement actual Jass rules.?
-        return True , "Success"
-
+    def _validate_play(self, trick):
+        turn = self.player.get_turn(trick)
+        return turn.validate_play(self.card)
 
 
 class Bid(models.Model):

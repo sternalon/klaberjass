@@ -9,6 +9,7 @@ class GameConfig():
         self.num_players = 4
         self.num_tricks = 8
         self.deck = CardDeck(self.deck_type, self.num_players)
+        self.rules = JassRules
 
 
 class Card(object):
