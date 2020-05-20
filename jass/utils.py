@@ -143,13 +143,13 @@ class JassRules():
         """Returns list of trumps from list of cards"""
         return [card for card in cards if self.is_trump(card)]
 
+    def get_winner(self, cards):
+        ranks = [self.card_rank(card) for card in cards]
+        return cards[ranks.index(max(ranks))] if ranks else None
+
     def get_top_trump(self, cards):
-        # TODO: Could be generalized to get any suit suit
         """Returns top trump from list of cards (None otherwise)"""
-        rank_dict = self.get_rank_dict(trumps=True)
-        trumps = [card for card in self.get_trumps(cards)]
-        ranks = [rank_dict.get(trump.number) for trump in trumps]
-        return trumps[ranks.index(max(ranks))] if ranks else None
+        return self.get_winner(self.get_trumps(cards))
 
     def can_overtrump(self):
         """Returns true if hand has a higher trump than the top trump in the trick"""

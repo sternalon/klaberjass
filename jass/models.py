@@ -39,6 +39,8 @@ class Game(models.Model):
     def get_players(self):
         return list(Player.objects.filter(game=self).order_by('position'))
 
+    def get_num_players(self):
+        return len(self.get_players())
 
     def _deal(self):
         config = GameConfig(self.name)
@@ -137,7 +139,7 @@ class Trick(models.Model):
         return Player.objects.get(game = self.game, position = position)
 
     def mod_num_player(self, number):
-        num_players = len(self.game.get_players())
+        num_players = self.game.get_num_players()
         if number > num_players:
             number = number - num_players
         return number
@@ -156,7 +158,20 @@ class Trick(models.Model):
             previous_trick = Trick.objects.get(game=self.game, number = self.number -1)
             return previous_trick.winner
 
+    def close_or_pass(self):
+        if self.num_cards_played() == self.game.get_num_players():
+            self.set_winner()
 
+    def set_winner(self):
+        # TODO: Need to refactor this to make it not call entire Rules Class
+        # TODO: Need to test this method.
+        # TODO: Get Card Look up to use as_number automatically.
+        rules = self.game.get_rules()
+        trick_cards = [card.card for card in self.get_playing_cards()]
+        turn = rules([], trick_cards, self.game.trumps)
+        winning_card = turn.get_winner(trick_cards)
+        self.winner = PlayingCard.objects.get(card=winning_card.as_number(), trick=self).player
+        self.save()
 
 class PlayingCard(models.Model):
     card = CardField()
@@ -177,6 +192,7 @@ class PlayingCard(models.Model):
             self.order_in_trick = trick.num_cards_played() + 1
             self.played = True
             self.save()
+            trick.close_or_pass()
         return valid, message
 
 

@@ -140,6 +140,9 @@ class JassRulesTest(TestCase):
         self.assertEqual(rules.get_top_trump(hand), self.jack_hearts)
         self.assertEqual(rules.get_top_trump(trick), self.ace_hearts)
 
+        # Test get winner
+        self.assertEqual(rules.get_winner(hand), self.jack_hearts)
+
         # Test can_overtrump
         self.assertTrue(rules.can_overtrump())
 
