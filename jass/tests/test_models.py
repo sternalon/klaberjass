@@ -147,6 +147,10 @@ class TestCreateJassGame(TestCase):
         self.assertTrue(valid)
         self.assertTrue(second_trick.to_play() == player1)
 
+        # Set winner of second trick
+        second_trick.set_winner()
+        self.assertTrue(second_trick.winner == player4)
+
         # Playing card from incorrect game.
         game2 = Game(name="klabberjass")
         game2.save()
