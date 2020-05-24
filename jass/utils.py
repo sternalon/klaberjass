@@ -10,6 +10,8 @@ class GameConfig():
         self.num_tricks = 8
         self.deck = CardDeck(self.deck_type, self.num_players)
         self.rules = JassRules
+        self.trick = JassTrick
+        self.scorer = JassScorer
 
 
 class Card(object):
@@ -81,44 +83,83 @@ class CardDeck():
         return [self.cards[i: i + num_hand] for i in range(0, num_cards, num_hand)]
 
 
-class JassRules():
-    rank = {"seven": 1, "eight": 2, "nine": 3, "jack": 4, "queen": 5, "king": 6, "ten": 7,  "ace": 8}
-    trump_rank = {"seven": 11, "eight": 12, "queen": 13, "king": 14, "ten": 15,  "ace": 16, "nine": 17, "jack": 18}
+
+class JassScorer():
+    rank = {"seven": 1, "eight": 2, "nine": 3, "jack": 4, "queen": 5, "king": 6, "ten": 7, "ace": 8}
+    trump_rank = {"seven": 11, "eight": 12, "queen": 13, "king": 14, "ten": 15, "ace": 16, "nine": 17, "jack": 18}
     value = {"seven": 0, "eight": 0, "nine": 0, "jack": 2, "queen": 3, "king": 4, "ten": 10, "ace": 11}
     trump_value = {"seven": 0, "eight": 0, "queen": 3, "king": 4, "ten": 10, "ace": 11, "nine": 14, "jack": 20}
+
+    def __init__(self, trump):
+        self.trump = trump
+
+    def card_value(self, card):
+        """Returns card value used for adding score"""
+        if card.suit == self.trump:
+            return JassScorer.trump_value[card.number]
+        else:
+            return JassScorer.value[card.number]
+
+    def card_rank(self, card, leading_suit):
+        """Returns card order for calculating which card is best"""
+        if card.suit == self.trump:
+            return JassScorer.trump_rank.get(card.number, 0)
+        elif card.suit == leading_suit:
+            return JassScorer.rank.get(card.number, 0)
+        else:
+            return 0
+
+    def get_points(self, cards):
+        points = [self.card_value(card) for card in cards]
+        return sum(points)
+
+    def get_points_from_tricks(self, tricks):
+        points = [self.get_points(trick) for trick in tricks]
+        return sum(points)
+
+
+class JassTrick():
+    def __init__(self, cards, trump):
+        self.cards = cards
+        self.trump = trump
+        self.scorer = JassScorer(trump)
+        self.leading_suit = self.get_leading_suit()
+        self.top_trump = self.get_top_trump()
+
+    def get_leading_suit(self):
+        # TODO: A trick has a leading suit not the rules
+        """Returns leading suit of the trick"""
+        return self.cards[0].suit if self.cards else None
+
+    def get_rank(self, card):
+        return self.scorer.card_rank(card, self.leading_suit)
+
+    def is_better(self, card1, card2):
+        """Returns whether the card1 beats card2"""
+        return self.get_rank(card1) > self.get_rank(card2)
+
+    def get_top_trump(self):
+        """Returns top trump from list of cards (None otherwise)"""
+        trumps = [card for card in self.cards if card.suit == self.trump]
+        ranks = [self.get_rank(trump) for trump in trumps]
+        return trumps[ranks.index(max(ranks))] if ranks else None
+
+    def get_winner(self):
+        ranks = [self.get_rank(card) for card in self.cards]
+        return self.cards[ranks.index(max(ranks))]
+
+
+
+class JassRules():
 
     def __init__(self, hand, trick, trump):
         self.hand = hand
         self.trick = trick
         self.trump = trump
-        self.leading_suit = self.get_leading_suit()
-        self.void = self.get_void(self.leading_suit)
-        self.trick_trump = self.get_top_trump(self.trick)
-        self.hand_trump = self.get_top_trump(self.hand)
+        self.trick = JassTrick(trick, trump)
+
+        self.void = self.get_void(self.trick.leading_suit)
         self.legal_cards = self.get_legal_cards()
-
-    def get_rank_dict(self, trumps):
-        if trumps:
-            return JassRules.trump_rank
-        else:
-            return JassRules.rank
-
-    def card_rank(self, card):
-        """Returns card order for calculating which card is best"""
-        rank_dict = self.get_rank_dict(self.is_trump(card))
-        return rank_dict.get(card.number, 0)
-
-    def card_value(self, card):
-        """Returns card value used for adding score"""
-        if self.is_trump(card):
-            return JassRules.trump_value[card.number]
-        else:
-            return JassRules.value[card.number]
-
-    def get_leading_suit(self):
-        # TODO: A trick has a leading suit not the rules
-        """Returns leading suit of the trick"""
-        return self.trick[0].suit if self.trick else None
 
     def get_void(self, suit):
         # TODO: A hand should be void, not the rules
@@ -129,31 +170,14 @@ class JassRules():
         """Returns whether the card is a trump"""
         return card.suit == self.trump
 
-    def is_better(self, card1, card2):
-        """Returns whether the card1 beats card2"""
-        return self.card_rank(card1) > self.card_rank(card2)
-
     def is_over_trump(self, card):
         # TODO: Needs to be tested
         """Returns whether card is an over trump (False if card is not a trump. True if no trumps in trick)"""
-        return self.is_trump(card) and self.is_better(card, self.trick_trump)
-
-    def get_trumps(self, cards):
-        # TODO: Could be generalized to get suit
-        """Returns list of trumps from list of cards"""
-        return [card for card in cards if self.is_trump(card)]
-
-    def get_winner(self, cards):
-        ranks = [self.card_rank(card) for card in cards]
-        return cards[ranks.index(max(ranks))] if ranks else None
-
-    def get_top_trump(self, cards):
-        """Returns top trump from list of cards (None otherwise)"""
-        return self.get_winner(self.get_trumps(cards))
+        return self.is_trump(card) and self.trick.is_better(card, self.trick.top_trump)
 
     def can_overtrump(self):
         """Returns true if hand has a higher trump than the top trump in the trick"""
-        return self.is_better(self.hand_trump, self.trick_trump)
+        return any([self.trick.is_better(card, self.trick.top_trump) for card in self.hand])
 
     def get_legal_cards(self):
         return [card for card in self.hand if self.validate_play(card)[0] is True]
@@ -176,22 +200,22 @@ class JassRules():
 
     def rule_leading_suit(self, card):
         """Player must play leading suit if they can"""
-        if self.trick:
+        if self.trick.cards:
             if not self.void:
-                return card.suit == self.leading_suit
+                return card.suit == self.trick.leading_suit
         return True
 
 
     def rule_must_trump(self, card):
         """If player is void, they must play trump if they can (unless they can't overtrump)"""
-        if self.trick:
+        if self.trick.cards:
             if self.void and self.can_overtrump():
                 return self.is_trump(card)
         return True
 
     def rule_overtrump(self, card):
         """Player must play over trump when trumps are lead or if they are void"""
-        if self.trick:
-            if ((self.trump == self.leading_suit) or self.void) and self.can_overtrump():
+        if self.trick.cards:
+            if ((self.trump == self.trick.leading_suit) or self.void) and self.can_overtrump():
                 return self.is_over_trump(card)
         return True

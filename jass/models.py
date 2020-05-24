@@ -75,6 +75,10 @@ class Game(models.Model):
         config = GameConfig(self.name)
         return config.rules
 
+    def get_trick_rules(self):
+        config = GameConfig(self.name)
+        return config.trick
+
 
 
 class Player(models.Model):
@@ -163,13 +167,11 @@ class Trick(models.Model):
             self.set_winner()
 
     def set_winner(self):
-        # TODO: Need to refactor this to make it not call entire Rules Class
-        # TODO: Need to test this method.
         # TODO: Get Card Look up to use as_number automatically.
-        rules = self.game.get_rules()
+        trick_rules = self.game.get_trick_rules()
         trick_cards = [card.card for card in self.get_playing_cards()]
-        turn = rules([], trick_cards, self.game.trumps)
-        winning_card = turn.get_winner(trick_cards)
+        trick_rules = trick_rules(trick_cards, self.game.trumps)
+        winning_card = trick_rules.get_winner()
         self.winner = PlayingCard.objects.get(card=winning_card.as_number(), trick=self).player
         self.save()
 
