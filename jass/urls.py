@@ -1,7 +1,11 @@
 from django.urls import path
-
-from . import views
+from jass.views.views import *
 
 urlpatterns = [
-    path('', views.index, name='index'),
+    # path('', index, name='index'),
+    # url(r'^register/', CreateUserView.as_view()),
+    path('register/', CreateUserView.as_view()),
+    path('login/', LoginUserView.as_view(), name="login"),
+    path('logout/', LogoutUserView.as_view(next_page='/jass'), name="logout"),
+    path('', HomeView.as_view())
 ]
