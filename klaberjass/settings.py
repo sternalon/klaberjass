@@ -125,5 +125,13 @@ STATIC_URL = '/static/'
 STATICFILES_DIRS = [
     os.path.join(BASE_DIR, "static"),
 ]
+
+CHANNEL_LAYERS = {
+ "default": {
+ "BACKEND": "asgiref.inmemory.ChannelLayer",
+ "ROUTING": "jass.routing.channel_routing",
+ },
+}
+
 LOGIN_REDIRECT_URL = '/jass/'
 LOGIN_URL = '/login/'
