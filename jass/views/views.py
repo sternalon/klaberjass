@@ -4,6 +4,11 @@ from django.contrib.auth.forms import UserCreationForm
 from django.contrib.auth import authenticate
 from django.contrib.auth.views import LoginView, LogoutView
 from django.contrib.auth import login
+from django.contrib.auth.decorators import login_required
+from django.utils.decorators import method_decorator
+
+from jass.models import User, Game
+
 
 class HomeView(TemplateView):
     template_name = 'home.html'
@@ -27,6 +32,24 @@ class LoginUserView(LoginView):
 class LogoutUserView(LogoutView):
     template_name = 'logout.html'
 
+
+class LobbyView(TemplateView):
+    template_name = 'components/lobby/lobby.html'
+
+    @method_decorator(login_required)
+    def dispatch(self, request, *args, **kwargs):
+        return super(LobbyView, self).dispatch(request, *args, **kwargs)
+
+    def get_context_data(self, **kwargs):
+        context = super(LobbyView, self).get_context_data(**kwargs)
+        # get current open games to prepopulate the list
+
+        # we're creating a list of games that contains just the id (for the link) and the creator
+        # available_games = [{'creator': game.creator.username, 'id': game.pk} for game in Game.get_available_games()]
+        # for the player's games, we're returning a list of games with the opponent and id
+        # player_games = Game.get_games_for_player(self.request.user)
+
+        return context
 
 def index(request):
     return HttpResponse("Hello, Jules, you are a legend.")
