@@ -1,0 +1,32 @@
+from django.http import HttpResponse
+from django.views.generic import CreateView, TemplateView
+from django.contrib.auth.forms import UserCreationForm
+from django.contrib.auth import authenticate
+from django.contrib.auth.views import LoginView, LogoutView
+from django.contrib.auth import login
+
+class HomeView(TemplateView):
+    template_name = 'home.html'
+
+
+class CreateUserView(CreateView):
+    template_name = 'register.html'
+    form_class = UserCreationForm
+    success_url = '/jass/'
+
+    def form_valid(self, form):
+        valid = super(CreateUserView, self).form_valid(form)
+        username, password = form.cleaned_data.get('username'), form.cleaned_data.get('password1')
+        new_user = authenticate(username=username, password=password)
+        login(self.request, new_user)
+        return valid
+
+class LoginUserView(LoginView):
+    template_name = 'login.html'
+
+class LogoutUserView(LogoutView):
+    template_name = 'logout.html'
+
+
+def index(request):
+    return HttpResponse("Hello, Jules, you are a legend.")
