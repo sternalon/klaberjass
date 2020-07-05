@@ -8,7 +8,7 @@ module.exports = {
           hello: './src/components/hello/index',
     },
     output: {
-      path: path.resolve('./static/frontend/'),
+      path: path.resolve('./static/bundles/'),
       filename: "[name].js"
   },
 
