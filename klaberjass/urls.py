@@ -20,7 +20,8 @@ from jass.views.views import *
 
 urlpatterns = [
     path('admin/', admin.site.urls),
-    path('jass/', include('jass.urls')),
+    path('', include('jass.urls')),
+    path('', include('frontend.urls')),
     # path('register/', CreateUserView.as_view()),
     # path('login/', LoginUserView.as_view(), name="login"),
     # path('logout/', LogoutUserView.as_view(next_page='/'), name="logout"),

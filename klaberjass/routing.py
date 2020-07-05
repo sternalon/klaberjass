@@ -1,9 +1,17 @@
-from channels.routing import route, route_class
-from channels.staticfiles import StaticFilesConsumer
-from jass import consumers
+from django.conf.urls import url
+from channels.routing import ProtocolTypeRouter, URLRouter
+from channels.auth import AuthMiddlewareStack
+from jass.consumers import LobbyConsumer
 
-# routes defined for channel calls
-# this is similar to the Django urls, but specifically for Channels
-channel_routing = [
-    route_class(consumers.LobbyConsumer,  path=r"^/lobby/"),
-]
+
+application = ProtocolTypeRouter({
+
+    # WebSocket  handler
+    "websocket": AuthMiddlewareStack(
+        URLRouter([
+            url(r"^jass/lobby/$", LobbyConsumer),
+        ])
+    ),
+
+
+})
