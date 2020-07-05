@@ -17,7 +17,7 @@ class HomeView(TemplateView):
 class CreateUserView(CreateView):
     template_name = 'register.html'
     form_class = UserCreationForm
-    success_url = '/jass/'
+    success_url = '/'
 
     def form_valid(self, form):
         valid = super(CreateUserView, self).form_valid(form)
@@ -30,11 +30,11 @@ class LoginUserView(LoginView):
     template_name = 'login.html'
 
 class LogoutUserView(LogoutView):
-    template_name = 'logout.html'
+    template_name = 'home.html'
 
 
 class LobbyView(TemplateView):
-    template_name = 'components/lobby/lobby.html'
+    template_name = 'lobby.html'
 
     @method_decorator(login_required)
     def dispatch(self, request, *args, **kwargs):
