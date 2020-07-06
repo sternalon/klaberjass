@@ -1,5 +1,5 @@
 var path = require("path");
-//var BundleTracker = require('webpack-bundle-tracker');
+var BundleTracker = require('webpack-bundle-tracker');
 
 module.exports = {
   context: __dirname,
@@ -15,7 +15,7 @@ module.exports = {
   plugins: [
     //new webpack.HotModuleReplacementPlugin(),
     //new webpack.NoErrorsPlugin(), // don't reload if there is an error
-//    new BundleTracker({path: __dirname, filename: './webpack-stats.json'})
+    new BundleTracker({path: __dirname, filename: './webpack-stats.json'})
 
   ],
 
