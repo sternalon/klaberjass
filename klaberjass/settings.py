@@ -39,7 +39,10 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
-    'jass'
+    'jass',
+    'frontend',
+    'channels',
+    'webpack_loader'
 ]
 
 MIDDLEWARE = [
@@ -57,8 +60,8 @@ ROOT_URLCONF = 'klaberjass.urls'
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
-        'DIRS': [os.path.join(BASE_DIR, 'templates')],
-        'APP_DIRS': True,
+        'DIRS': [os.path.join(BASE_DIR, 'frontend/templates')],
+        'APP_DIRS': False,
         'OPTIONS': {
             'context_processors': [
                 'django.template.context_processors.debug',
@@ -71,7 +74,7 @@ TEMPLATES = [
 ]
 
 WSGI_APPLICATION = 'klaberjass.wsgi.application'
-
+ASGI_APPLICATION = 'klaberjass.routing.application'
 
 # Database
 # https://docs.djangoproject.com/en/3.0/ref/settings/#databases
@@ -120,11 +123,27 @@ USE_TZ = True
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/3.0/howto/static-files/
 
-STATIC_ROOT = ''
+
+LOGIN_REDIRECT_URL = '/'
+LOGIN_URL = '/login/'
+
+LANGUAGE_CODE = 'en-us'
+
+TIME_ZONE = 'UTC'
+
+USE_I18N = True
+
+USE_L10N = True
+
+USE_TZ = True
+
+
+STATIC_ROOT = 'frontend'
 STATIC_URL = '/static/'
 STATICFILES_DIRS = [
     os.path.join(BASE_DIR, "static"),
 ]
+
 
 CHANNEL_LAYERS = {
  "default": {
@@ -133,5 +152,12 @@ CHANNEL_LAYERS = {
  },
 }
 
-LOGIN_REDIRECT_URL = '/jass/'
-LOGIN_URL = '/login/'
+
+
+WEBPACK_LOADER = {
+    'DEFAULT': {
+        'BUNDLE_DIR_NAME': 'bundles/',  # end with slash
+        'STATS_FILE': os.path.join(BASE_DIR, 'frontend/webpack-stats.json')
+
+    }
+}
