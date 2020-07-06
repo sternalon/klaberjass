@@ -138,7 +138,7 @@ USE_L10N = True
 USE_TZ = True
 
 
-STATIC_ROOT = ''
+STATIC_ROOT = 'frontend'
 STATIC_URL = '/static/'
 STATICFILES_DIRS = [
     os.path.join(BASE_DIR, "static"),
@@ -156,8 +156,8 @@ CHANNEL_LAYERS = {
 
 WEBPACK_LOADER = {
     'DEFAULT': {
-        'BUNDLE_DIR_NAME': '/bundles/',  # end with slash
-        'STATS_FILE': os.path.join(BASE_DIR, 'webpack-stats.json')
+        'BUNDLE_DIR_NAME': 'bundles/',  # end with slash
+        'STATS_FILE': os.path.join(BASE_DIR, 'frontend/webpack-stats.json')
 
     }
 }
