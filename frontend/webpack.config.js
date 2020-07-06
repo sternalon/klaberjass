@@ -4,8 +4,8 @@ var BundleTracker = require('webpack-bundle-tracker');
 module.exports = {
   context: __dirname,
   entry: {
-          lobby: './src/components/lobby/index',
-          hello: './src/components/hello/index',
+          lobby: './src/components/lobby/index.jsx',
+          hello: './src/components/hello/index.js',
     },
     output: {
       path: path.resolve('./static/bundles/'),
@@ -22,7 +22,7 @@ module.exports = {
   module: {
     rules: [
       {
-        test: /\.js$/,
+        test: /\.(js|jsx)$/,
         exclude: /node_modules/,
         use: {
           loader: "babel-loader"
