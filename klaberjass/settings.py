@@ -74,7 +74,7 @@ TEMPLATES = [
 ]
 
 WSGI_APPLICATION = 'klaberjass.wsgi.application'
-ASGI_APPLICATION = 'klaberjass.routing.application'
+ASGI_APPLICATION = 'jass.routing.application'
 
 # Database
 # https://docs.djangoproject.com/en/3.0/ref/settings/#databases

@@ -4,7 +4,7 @@ import ReactDOM from 'react-dom'
 import $ from 'jquery'
 
 // lobby socket url
-var lobby_sock = 'ws://' + window.location.host + "/jass/lobby/"
+var lobby_sock = 'ws://' + window.location.host + "/lobby/"
 // preset the current_user
 var current_user = null
 
