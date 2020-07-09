@@ -3,7 +3,7 @@ import ReactDOM from 'react-dom';
 import Websocket from 'react-websocket'
 import $ from 'jquery'
 import PropTypes from 'prop-types';
-import PlayerGames from './PlayerGames'
+import PlayerSeries from './PlayerSeries'
 
 
 class LobbyBase extends React.Component {
@@ -15,24 +15,24 @@ class LobbyBase extends React.Component {
     constructor(props) {
         super(props);
         this.state = {
-            player_game_list: [],
-            available_game_list: []
+            player_series_list: [],
+            available_series_list: []
         }
 
         // bind button click
         this.sendSocketMessage = this.sendSocketMessage.bind(this);
     }
 
-    getPlayerGames(){
-        this.serverRequest = $.get('http://localhost:8080/player-games/?format=json', function (result) {
+    getPlayerSeries(){
+        this.serverRequest = $.get('http://localhost:8080/player-series/?format=json', function (result) {
            this.setState({
-            player_game_list: result,
+            player_series_list: result,
              })
         }.bind(this))
     }
 
     componentDidMount() {
-       this.getPlayerGames()
+       this.getPlayerSeries()
     }
 
     componentWillUnmount() {
@@ -42,15 +42,16 @@ class LobbyBase extends React.Component {
     handleData(data) {
         //receives messages from the connected websocket
         let result = JSON.parse(data)
-        // new games, so get an updated list of this player's game
-        this.getPlayerGames()
-        // we've received an updated list of available games
-        this.setState({available_game_list: result})
+        // new series, so get an updated list of this player's series
+        this.getPlayerSeries()
+        // we've received an updated list of available series
+        this.setState({available_series_list: result})
     }
 
     sendSocketMessage(message){
         // sends message to channels back-end
        const socket = this.refs.socket
+       console.log("YOLOLOLOLO", JSON.stringify(message))
        socket.state.ws.send(JSON.stringify(message))
     }
 
@@ -60,7 +61,7 @@ class LobbyBase extends React.Component {
                 <Websocket ref="socket" url={this.props.socket}
                     onMessage={this.handleData.bind(this)} reconnect={true}/>
                 <div className="col-lg-4">
-                    <PlayerGames player={this.props.current_user} game_list={this.state.player_game_list}
+                    <PlayerSeries player={this.props.current_user} series_list={this.state.player_series_list}
                                  sendSocketMessage={this.sendSocketMessage} />
                 </div>
             </div>

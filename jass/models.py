@@ -16,9 +16,12 @@ class Series(models.Model):
 
     @staticmethod
     def get_series_for_player(user):
-        # TODO Test this method.
-        # return SeriesPlayer.objects.filter(user=user, series__completed=False).series
         return Series.objects.filter(player__user=user, completed=False).order_by("created")
+
+    @staticmethod
+    def create_series(user, position=1):
+        series = Series.objects.create()
+        series.add_player(user, position)
 
     def add_player(self, user, position):
         if position > GameConfig(self.game_type).num_players:
@@ -37,6 +40,7 @@ class SeriesPlayer(models.Model):
 
     class Meta:
         unique_together = ('series', 'position',)
+
 
 class Game(models.Model):
     KLABBERJASS = 'klabberjass'

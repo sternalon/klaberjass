@@ -42,7 +42,8 @@ INSTALLED_APPS = [
     'jass',
     'frontend',
     'channels',
-    'webpack_loader'
+    'webpack_loader',
+    'rest_framework',
 ]
 
 MIDDLEWARE = [
@@ -74,7 +75,7 @@ TEMPLATES = [
 ]
 
 WSGI_APPLICATION = 'klaberjass.wsgi.application'
-ASGI_APPLICATION = 'jass.routing.application'
+ASGI_APPLICATION = 'klaberjass.routing.application'
 
 # Database
 # https://docs.djangoproject.com/en/3.0/ref/settings/#databases
@@ -143,14 +144,6 @@ STATIC_URL = '/static/'
 STATICFILES_DIRS = [
     os.path.join(BASE_DIR, "static"),
 ]
-
-
-CHANNEL_LAYERS = {
- "default": {
- "BACKEND": "asgiref.inmemory.ChannelLayer",
- "ROUTING": "jass.routing.channel_routing",
- },
-}
 
 
 

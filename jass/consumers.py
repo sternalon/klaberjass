@@ -2,7 +2,7 @@ import re
 import logging
 # from channels import Group
 # from channels.sessions import channel_session
-# from .models import Game, GameSquare
+from .models import Series
 # from channels.auth import channel_session_user
 from channels.generic.websocket import JsonWebsocketConsumer
 
@@ -21,19 +21,28 @@ class LobbyConsumer(JsonWebsocketConsumer):
         """
         return ["lobby"]
 
-    def connect(self, message, **kwargs):
+    def connect(self, **kwargs):
         """
-        Perform things on connection start
+        Perform things on connection start - can be removed.
         """
-        self.message.reply_channel.send({"accept": True})
+        self.accept()
         pass
 
-    def receive(self, content, **kwargs):
+    # def receive(self, text_data=None, bytes_data=None):
+    def receive_json(self, content=None, **kwargs):
         """
         Called when a message is received with either text or bytes
         filled out.
         """
+        channel_session_user = True
         http_user = True
+
+        # get the action that's coming in
+        action = content['action']
+        if action == 'create_series':
+            # create a new game using the part of the channel name
+            Series.create_series(self.scope["user"])
+
 
     def disconnect(self, message, **kwargs):
         """

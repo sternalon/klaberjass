@@ -15,15 +15,11 @@ Including another URLconf
 """
 from django.contrib import admin
 from django.urls import include, path
-from jass.views.views import *
 
+admin.autodiscover()
 
 urlpatterns = [
     path('admin/', admin.site.urls),
     path('', include('jass.urls')),
     path('', include('frontend.urls')),
-    # path('register/', CreateUserView.as_view()),
-    # path('login/', LoginUserView.as_view(), name="login"),
-    # path('logout/', LogoutUserView.as_view(next_page='/'), name="logout"),
-    # path('', HomeView.as_view())
 ]
