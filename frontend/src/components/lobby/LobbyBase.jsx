@@ -51,7 +51,6 @@ class LobbyBase extends React.Component {
     sendSocketMessage(message){
         // sends message to channels back-end
        const socket = this.refs.socket
-       console.log("YOLOLOLOLO", JSON.stringify(message))
        socket.state.ws.send(JSON.stringify(message))
     }
 

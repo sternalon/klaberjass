@@ -11,7 +11,8 @@ class PlayerSeries extends React.Component{
       // bind button click
      this.onCreateSeriesClick = this.onCreateSeriesClick.bind(this);
      this.renderButton = this.renderButton.bind(this);
-     this.renderOpponent = this.renderOpponent.bind(this)
+     this.renderPlayer = this.renderPlayer.bind(this)
+     this.playerInGame = this.playerInSeries.bind(this)
     }
 
     onCreateSeriesClick(event) {
@@ -23,32 +24,44 @@ class PlayerSeries extends React.Component{
         this.setState({series_list: newProp.series_list})
     }
 
+    playerInSeries(series){
+        var player = series.players.find(obj => {
+            return obj.username === this.props.player.username
+         })
+        return player != null
+        }
+
     renderButton(series){
          if (series.completed){
             return "View"
-         } else if (series.opponent == null && series.creator.id == this.props.player.id){
-             return "Waiting..."
+//         } else if (series.opponent == null && series.creator.id == this.props.player.id){
+        } else if (series.players.length < 4 && this.playerInSeries(series)){
+            return "Waiting..."
          } else{
              return "Play"
          }
 
     }
 
-    renderOpponent(series){
-        console.log(series)
-        if (series.opponent != null){
-            return series.opponent.username
+    renderPlayer(series, position){
+         var player = series.players.find(obj => {
+            return obj.position === position
+         })
+
+        if (player != null){
+            return player.username
         } else {
             return "???"
         }
     }
+
 
     renderSeriesList(){
         if (this.props.series_list.length > 0){
             return this.props.series_list.map(function(series){
                     return <li key={series.id} className="list-group-item">
                                 <span className="badge pull-left">{series.id}</span>&nbsp;&nbsp;
-                                <span>{series.creator.username}</span> vs <span>{this.renderOpponent(series)}</span>
+                                (<span>{this.renderPlayer(series,1)}</span> and <span>{this.renderPlayer(series,3)}</span>)  &nbsp; &nbsp;  vs  &nbsp; &nbsp;  (<span>{this.renderPlayer(series,2)}</span> and <span>{this.renderPlayer(series,4)}</span>)
 
                                 <a className="btn btn-sm btn-primary pull-right" href={"/series/"+series.id+"/"}>{this.renderButton(series)}</a>
                             </li>

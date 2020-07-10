@@ -16,7 +16,7 @@ class Series(models.Model):
 
     @staticmethod
     def get_series_for_player(user):
-        return Series.objects.filter(player__user=user, completed=False).order_by("created")
+        return Series.objects.filter(players__user=user, completed=False).order_by("players__position")
 
     @staticmethod
     def create_series(user, position=1):
@@ -34,13 +34,15 @@ class Series(models.Model):
             SeriesPlayer.objects.create(user= user, position= position, series= self)
 
 class SeriesPlayer(models.Model):
-    user = models.ForeignKey(User, on_delete=models.CASCADE)
+    user = models.ForeignKey(User,on_delete=models.CASCADE)
     position = models.SmallIntegerField()
-    series = models.ForeignKey(Series, related_name="player", on_delete=models.CASCADE)
+    series = models.ForeignKey(Series, related_name="players", on_delete=models.CASCADE)
 
     class Meta:
         unique_together = ('series', 'position',)
 
+    def __str__(self):
+        return self.user.username
 
 class Game(models.Model):
     KLABBERJASS = 'klabberjass'

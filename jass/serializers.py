@@ -1,5 +1,5 @@
 from django.contrib.auth.models import User
-from .models import Game, Series
+from .models import Game, Series, SeriesPlayer
 from rest_framework import serializers
 
 
@@ -16,15 +16,18 @@ class GameSerializer(serializers.ModelSerializer):
         depth = 2
 
 class SeriesPlayersSerializer(serializers.ModelSerializer):
+    # user_username = serializers.RelatedField(source='username', read_only=True)
+    username = serializers.CharField(source='user.username')
+
     class Meta:
-        model = Game
-        fields = ('id', 'user', 'position', 'series')
+        model = SeriesPlayer
+        fields = ('username', 'position')
         depth = 1
 
 class SeriesSerializer(serializers.ModelSerializer):
-    players = SeriesPlayersSerializer(many=True, read_only=True)
+    players = SeriesPlayersSerializer(many=True)
 
     class Meta:
         model = Series
         fields = ('id', 'score1', 'score2', 'game_type', 'players', 'completed', 'created')
-        depth = 2
+        depth = 1
