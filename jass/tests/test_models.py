@@ -208,6 +208,8 @@ class TestCreateJassGame(TestCase):
         user2_series = Series.get_series_for_player(self.user_2)
         self.assertEqual(set(user2_series), set([self.series1, self.series3]))
 
+        self.assertTrue(self.series1.player_in_series(self.user_1))
+        self.assertFalse(self.series2.player_in_series(self.user_2))
 
 
 

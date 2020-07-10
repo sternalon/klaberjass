@@ -27,6 +27,22 @@ class Series(models.Model):
         series = Series.objects.create()
         series.add_player(user, position)
 
+    @staticmethod
+    def get_by_id(id):
+        return Series.objects.get(id=id)
+
+    def player_in_series(self, user):
+        ''' Returns true if player is in series'''
+        return len(list(SeriesPlayer.objects.filter(user=user, series=self)))>0
+
+    def add_next_user(self, user):
+        num_players = len(SeriesPlayer.objects.filter(series=self))
+        self.add_player(user, num_players +1)
+
+    def is_full(self):
+        num_players = len(SeriesPlayer.objects.filter(series=self))
+        return num_players == GameConfig(self.game_type).num_players
+
     def add_player(self, user, position):
         if position > GameConfig(self.game_type).num_players:
             raise Exception(f"Error: Position {position} must be less than the number of players  {GameConfig(self.game_type).num_players}")

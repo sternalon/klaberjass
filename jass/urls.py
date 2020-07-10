@@ -8,6 +8,7 @@ urlpatterns = [
     path('login/', LoginUserView.as_view(), name="login"),
     path('logout/', LogoutUserView.as_view(next_page='/'), name="logout"),
     path('lobby/', LobbyView.as_view()),
+    path('series/<int:series_id>/', SeriesView.as_view()),
     path('', HomeView.as_view())
 ]
 
@@ -17,5 +18,6 @@ urlpatterns += [
 ]
 router = DefaultRouter()
 router.register(r'player-series', PlayerSeriesViewSet, 'player_series')
+router.register(r'available-series', AvailableSeriesViewSet, 'available_series')
 
 urlpatterns += router.urls

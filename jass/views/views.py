@@ -6,8 +6,10 @@ from django.contrib.auth.views import LoginView, LogoutView
 from django.contrib.auth import login
 from django.contrib.auth.decorators import login_required
 from django.utils.decorators import method_decorator
+from django.contrib.auth import get_user
+from django.contrib import messages
 
-from jass.models import User, Game
+from jass.models import User, Series
 
 
 class HomeView(TemplateView):
@@ -51,5 +53,41 @@ class LobbyView(TemplateView):
 
         return context
 
+
+class SeriesView(TemplateView):
+    template_name = 'game.html'
+    series = None
+
+    @method_decorator(login_required)
+    def dispatch(self, request, *args, **kwargs):
+        # get the game by the id
+        self.series = Series.get_by_id(kwargs['series_id'])
+        user = get_user(request)
+        # check to see if the series is open and available for this user
+        # if this player is the creator, just return
+        if self.series.player_in_series(user):
+            return super(SeriesView, self).dispatch(request, *args, **kwargs)
+
+        # if there is no opponent and the series is not yet completed,
+        # set the opponent as this user
+
+        #Check if series is not yet full, and adds player to series
+        if not self.series.is_full() and not self.series.completed:
+            self.series.add_next_user(user)
+            return super(SeriesView, self).dispatch(request, *args, **kwargs)
+        else:
+            messages.add_message(request, messages.ERROR, 'Sorry, the selected series is not available.')
+            return redirect('/lobby/')
+
+    def get_context_data(self, **kwargs):
+        context = super(SeriesView, self).get_context_data(**kwargs)
+        context['series'] = self.series
+
+        return context
+
+
+
 def index(request):
     return HttpResponse("Hello, Jules, you are a legend.")
+
+
