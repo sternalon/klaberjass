@@ -16,7 +16,11 @@ class Series(models.Model):
 
     @staticmethod
     def get_series_for_player(user):
-        return Series.objects.filter(players__user=user, completed=False).order_by("players__position")
+        return Series.objects.filter(players__user=user, completed=False).order_by("created")
+
+    @staticmethod
+    def get_available_series():
+        return Series.objects.filter(completed=False).order_by("created")
 
     @staticmethod
     def create_series(user, position=1):

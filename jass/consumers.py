@@ -5,7 +5,8 @@ import logging
 from .models import Series
 # from channels.auth import channel_session_user
 from channels.generic.websocket import JsonWebsocketConsumer
-
+from channels import layers
+from asgiref.sync import async_to_sync
 log = logging.getLogger(__name__)
 
 
@@ -13,20 +14,22 @@ class LobbyConsumer(JsonWebsocketConsumer):
     # Set to True to automatically port users from HTTP cookies
     # (you don't need channel_session_user, this implies it)
     http_user = True
+    groups = ["lobby"]
 
-    def connection_groups(self, **kwargs):
-        """
-        Called to return the list of groups to automatically add/remove
-        this connection to/from.
-        """
-        return ["lobby"]
+    # def connection_groups(self, **kwargs):
+    #     """
+    #     Called to return the list of groups to automatically add/remove
+    #     this connection to/from.
+    #     """
+    #     return ["lobby"]
 
-    def connect(self, **kwargs):
-        """
-        Perform things on connection start - can be removed.
-        """
-        self.accept()
-        pass
+    # def connect(self, **kwargs):
+    #     """
+    #     Perform things on connection start - can be removed.
+    #     """
+    #     self.accept()
+    #     # async_to_sync(self.channel_layer.group_add)("lobby", self.channel_name)
+    #     pass
 
     # def receive(self, text_data=None, bytes_data=None):
     def receive_json(self, content=None, **kwargs):
@@ -43,9 +46,12 @@ class LobbyConsumer(JsonWebsocketConsumer):
             # create a new game using the part of the channel name
             Series.create_series(self.scope["user"])
 
+    def lobby_send(self, event):
+        self.send(text_data=event["text"])
 
-    def disconnect(self, message, **kwargs):
-        """
-        Perform things on connection close
-        """
-        pass
+    # def disconnect(self, message, **kwargs):
+    #     """
+    #     Perform things on connection close
+    #     """
+    #     # async_to_sync(self.channel_layer.group_discard)("lobby", self.channel_name)
+    #     pass
