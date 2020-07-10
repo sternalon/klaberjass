@@ -42,7 +42,8 @@ INSTALLED_APPS = [
     'jass',
     'frontend',
     'channels',
-    'webpack_loader'
+    'webpack_loader',
+    'rest_framework',
 ]
 
 MIDDLEWARE = [
@@ -61,7 +62,7 @@ TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
         'DIRS': [os.path.join(BASE_DIR, 'frontend/templates')],
-        'APP_DIRS': False,
+        'APP_DIRS': True,
         'OPTIONS': {
             'context_processors': [
                 'django.template.context_processors.debug',
@@ -144,15 +145,20 @@ STATICFILES_DIRS = [
     os.path.join(BASE_DIR, "static"),
 ]
 
+# CHANNEL_LAYERS = {
+#     "default": {
+#         "BACKEND": "channels_redis.core.RedisChannelLayer",
+#         "CONFIG": {
+#             "hosts": [("127.0.0.1", 6379)],
+#         },
+#     },
+# }
 
 CHANNEL_LAYERS = {
- "default": {
- "BACKEND": "asgiref.inmemory.ChannelLayer",
- "ROUTING": "jass.routing.channel_routing",
- },
+    "default": {
+        "BACKEND": "channels.layers.InMemoryChannelLayer"
+    }
 }
-
-
 
 WEBPACK_LOADER = {
     'DEFAULT': {

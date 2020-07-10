@@ -6,16 +6,54 @@ from .utils import GameConfig
 # Create your models here.
 
 class Series(models.Model):
+    KLABBERJASS = 'klabberjass'
+    GAMES = [(KLABBERJASS, 'Klabberjass')]
     score1 = models.IntegerField(default=0)
     score2 = models.IntegerField(default=0)
     completed = models.BooleanField(default=False)
+    created = models.DateTimeField(auto_now_add=True)
+    game_type = models.CharField(choices=GAMES, default=KLABBERJASS, max_length=12, null=False)
+
+    @staticmethod
+    def get_series_for_player(user):
+        return Series.objects.filter(players__user=user, completed=False).order_by("created")
+
+    @staticmethod
+    def get_available_series():
+        return Series.objects.filter(completed=False).order_by("created")
+
+    @staticmethod
+    def create_series(user, position=1):
+        series = Series.objects.create()
+        series.add_player(user, position)
+
+    def add_player(self, user, position):
+        if position > GameConfig(self.game_type).num_players:
+            raise Exception(f"Error: Position {position} must be less than the number of players  {GameConfig(self.game_type).num_players}")
+        elif len(SeriesPlayer.objects.filter(series=self, position = position)) > 0:
+            raise Exception(f"Error: SeriesPlayer position {position} is already filled for series {len(self.id)}")
+        elif len(SeriesPlayer.objects.filter(series=self, user = user)) > 0:
+            raise Exception(f"Error: User {user.username} has alredy joined series {len(self.id)}")
+        else:
+            SeriesPlayer.objects.create(user= user, position= position, series= self)
+
+class SeriesPlayer(models.Model):
+    user = models.ForeignKey(User,on_delete=models.CASCADE)
+    position = models.SmallIntegerField()
+    series = models.ForeignKey(Series, related_name="players", on_delete=models.CASCADE)
+
+    class Meta:
+        unique_together = ('series', 'position',)
+
+    def __str__(self):
+        return self.user.username
 
 class Game(models.Model):
     KLABBERJASS = 'klabberjass'
     GAMES = [(KLABBERJASS, 'Klabberjass')]
     SUITS = [("spade", 'Spade'), ("heart", 'Heart'), ("diamond", 'Diamond'), ("club", 'Club')]
 
-    name = models.CharField(choices=GAMES, default=KLABBERJASS, max_length=12)
+    game_type = models.CharField(choices=GAMES, default=KLABBERJASS, max_length=12)
     completed = models.BooleanField(default=False)
     series = models.ForeignKey(Series, on_delete=models.CASCADE, null=True)
     trumps = models.CharField(choices=SUITS, max_length=7)
@@ -28,7 +66,7 @@ class Game(models.Model):
         self._deal()
 
     def _set_players(self, users):
-        num_players = GameConfig(self.name).num_players
+        num_players = GameConfig(self.game_type).num_players
         if len(users)!= num_players:
             raise Exception(f"Error: Incorrect number of players: {len(users)} = {num_players}")
         position = 0
@@ -43,7 +81,7 @@ class Game(models.Model):
         return len(self.get_players())
 
     def _deal(self):
-        config = GameConfig(self.name)
+        config = GameConfig(self.game_type)
         deck = config.deck
         hands = deck.deal()
         self._assign_cards(hands)
@@ -72,11 +110,11 @@ class Game(models.Model):
             return None
 
     def get_rules(self):
-        config = GameConfig(self.name)
+        config = GameConfig(self.game_type)
         return config.rules
 
     def get_trick_rules(self):
-        config = GameConfig(self.name)
+        config = GameConfig(self.game_type)
         return config.trick
 
 
@@ -85,6 +123,9 @@ class Player(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE)
     position = models.SmallIntegerField()
     game = models.ForeignKey(Game, on_delete=models.CASCADE)
+
+    class Meta:
+        unique_together = ('game', 'position', )
 
     def get_hand(self):
         return list(PlayingCard.objects.filter(game=self.game, player=self))

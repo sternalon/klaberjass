@@ -1,7 +1,7 @@
 from django.test import TestCase
 
 from django.contrib.auth.models import User
-from ..models import PlayingCard, Game, Player, Trick
+from ..models import PlayingCard, Game, Player, Trick, Series
 from ..utils import Card, GameConfig
 
 class TestCreateJassGame(TestCase):
@@ -14,7 +14,7 @@ class TestCreateJassGame(TestCase):
 
         self.users = [self.user_1, self.user_2, self.user_3, self.user_4]
 
-        self.game = Game(name="klabberjass")
+        self.game = Game(game_type="klabberjass")
         self.game.save()
         self.game._set_players(self.users)
 
@@ -52,7 +52,7 @@ class TestCreateJassGame(TestCase):
         game = self.game
         card = Card(number="five", suit="club")
 
-        player = Player.objects.create(user=self.user_1, game = game, position=1)
+        player, created = Player.objects.get_or_create(user=self.user_1, game = game, position=1)
 
         playing_card = PlayingCard.objects.create(player=player, game = game, card=card)
 
@@ -152,7 +152,7 @@ class TestCreateJassGame(TestCase):
         self.assertTrue(second_trick.winner == player4)
 
         # Playing card from incorrect game.
-        game2 = Game(name="klabberjass")
+        game2 = Game(game_type="klabberjass")
         game2.save()
         game2._set_players(self.users)
         game2._deal()
@@ -161,6 +161,55 @@ class TestCreateJassGame(TestCase):
         valid, message = wrong_card.play(second_trick)
         self.assertFalse(valid)
         self.assertTrue(message == "Invalid Play: Card belongs to incorrect game")
+
+class TestCreateJassGame(TestCase):
+
+    def setUp(self):
+        self.user_1 = User.objects.create_user(username='user1')
+        self.user_2 = User.objects.create_user(username='user2')
+        self.user_3 = User.objects.create_user(username='user3')
+        self.user_4 = User.objects.create_user(username='user4')
+
+        self.series1 = Series.objects.create()
+        self.series2 = Series.objects.create()
+        self.series3 = Series.objects.create()
+
+
+    def tearDown(self):
+        # Clean up after each test
+        self.user_1.delete()
+        self.user_2.delete()
+
+    def test_assign_players(self):
+        """
+        Adding players to Series
+        """
+        self.series1.add_player(self.user_1, position=1)
+
+        # The following players can not be added to the series
+        with self.assertRaises(Exception):
+            """Only one player allowed per position"""
+            self.series1.add_player(self.user_2, position=1)
+        with self.assertRaises(Exception):
+            """Player only allowed to play in one position per series"""
+            self.series1.add_player(self.user_1, position=2)
+        with self.assertRaises(Exception):
+            """Position greater than number of players in the game"""
+            self.series1.add_player(self.user_2, position=5)
+
+        self.series2.add_player(self.user_1, position=2)
+
+        self.series1.add_player(self.user_2, position=2)
+        self.series3.add_player(self.user_2, position=3)
+
+        user1_series = Series.get_series_for_player(self.user_1)
+        self.assertEqual(set(user1_series), set([self.series1, self.series2]))
+
+        user2_series = Series.get_series_for_player(self.user_2)
+        self.assertEqual(set(user2_series), set([self.series1, self.series3]))
+
+
+
 
 
 
