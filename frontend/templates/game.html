@@ -1,0 +1,25 @@
+{% extends "base.html" %} {% load render_bundle from webpack_loader %}
+
+{% block page_javascript %}
+{% render_bundle 'game' %}
+{% endblock %}
+
+{% block main_content %}
+<div class="row">
+    <div class="col-lg-12">
+        <h3>Play Jass! Now!</h3>
+        <hr>
+
+    <div class="row">
+        <div class="col-md-12">
+            <div class="panel panel-default">
+                <div class="panel-body" data-series={{series.id}} id="series_component">
+                    <!-- game is rendered here -->
+
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+</div>
+{% endblock %}
