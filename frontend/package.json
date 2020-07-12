@@ -13,17 +13,23 @@
   "license": "ISC",
   "devDependencies": {
     "@babel/core": "^7.10.4",
+    "@babel/plugin-proposal-class-properties": "^7.10.4",
     "@babel/preset-env": "^7.10.4",
     "@babel/preset-react": "^7.10.4",
     "babel-loader": "^8.1.0",
     "react": "^16.13.1",
     "react-dom": "^16.13.1",
+    "svg-url-loader": "^6.0.0",
     "webpack": "^4.43.0",
     "webpack-bundle-tracker": "^0.4.3",
     "webpack-cli": "^3.3.12"
   },
   "dependencies": {
+    "css-loader": "^3.6.0",
     "jquery": "^3.5.1",
-    "react-websocket": "^2.1.0"
+    "react-draggable": "^4.4.3",
+    "react-dropdown": "^1.7.0",
+    "react-websocket": "^2.1.0",
+    "style-loader": "^1.2.1"
   }
 }
