@@ -1,4 +1,14 @@
 {% extends "base.html" %}
+
+{% load static %}
+{% block additional_head %}
+    <link rel="stylesheet" href="{% static 'css/index.css' %}"/>
+    <link rel="stylesheet" href="{% static 'css/hand.css' %}"/>
+    <link rel="stylesheet" href="{% static 'css/PlayingCard.css' %}"/>
+
+{% endblock %}
+
+
 {% load render_bundle from webpack_loader %}
 
 
