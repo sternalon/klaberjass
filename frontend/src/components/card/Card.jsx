@@ -12,37 +12,8 @@ layout: "spread",
 handSize: "8" }
 
   }
-    randomHand = (size) => {
-        console.log('size: ', size)
-        var cardList = Object.keys(PlayingCardsList);
-        var hand = [];
-        var used = {};
-        for(var i = 0; i < size; i++) {
-            var card = Math.floor(Math.random()*Object.keys(PlayingCardsList).length);
-            console.log("card: ", card);
-            while(used[card]) {
-                card = Math.floor(Math.random()*Object.keys(PlayingCardsList).length);
-            }
-            used[card] =  true;
-            hand.push(cardList[card]);
-        }
-        console.log("hand: ", hand)
-        return hand;
-    };
-    _onSelectLayout = (option) => {
-        console.log('You selected ', option);
-        this.setState({layout: option.value}, function(){
 
-        });
-    };
-    _onSelectHandSize = (option) => {
-        console.log('You selected ', option);
-        var hand = this.randomHand(option.value);
 
-        this.setState({hand : hand, handSize : option}, function(){
-
-        });
-    };
     _getCardSize() {
         console.log("window: ", window.innerWidth);
         console.log('handsize', this.state.hand.length)
@@ -51,44 +22,44 @@ handSize: "8" }
         return this.state.layout !== "spread" || cardSize > 100 ? 100 : cardSize;
     }
 
+    _getHandPositions() {
+        return {
+            top:{'transform' : 'translateY(-30%) rotate(180deg)', 'right': '50%', 'top': "5%", 'position': 'absolute'},
+            bottom:{'bottom': '-5%', 'right': '50%', 'position': 'absolute', 'height' : '30%'},
+            left:{'bottom': '40%','right': '90%', 'position': 'absolute', 'transform': 'rotate(90deg)' },
+            right:{'bottom': '40%','left': '90%', 'position': 'absolute', 'transform': 'rotate(270deg)' }
+
+            }
+
+           }
+
+
+//             handS: {'bottom': '0', 'right': '50%', 'position': 'absolute', 'height' : '30%'},
+//             handNE : {'bottom': '0', 'right': '50%', 'position': 'absolute', 'transform': 'rotate(45deg) translate(' + props.cardSize +'px -' + window.innerHeight() + ')', 'transform-origin' : ' 0px -' + window.innerWidth / 2 + 'px'},
+//             board: {'left': 'calc(50% - ' + props.cardSize * 1.4 + 'px)', 'top': '35%', 'position': 'absolute', 'width': props.cardSize * 4 + 'px'}
+
 
   render() {
-    const handStyle = {
-        margin: "auto",
-        width: "10%",
-        paddingBottom: "5%",
-        paddingTop: "5%",
-        left: "45%",
-        top: "50%"
-    };
+
       return (
           <div>
-{/*                <div style={{"width": "30%", "paddingLeft":"32%"}}> */}
-{/*                   Select a Layout: */}
-{/*                   <Dropdown */}
-{/*                       options={["fan", "spread"]} */}
-{/*                       onChange={this._onSelectLayout} */}
-{/*                       value={this.state.layout} */}
-{/*                       placeholder="Select an option" */}
-{/*                   /> */}
-{/*               </div> */}
 
 
-            <div id='top' style={{'transform' : 'translateY(-30%) rotate(180deg)', 'right': '50%', 'top': "5%", 'position': 'absolute'}}>
+            <div id='top' style={this._getHandPositions().top}>
                     <Hand hide={true} layout={this.state.layout} cards={this.state.hand} cardSize={1.2*this._getCardSize()}/>
              </div>
 
 
-            <div id='bottom' style={{'bottom': '-5%', 'right': '50%', 'position': 'absolute', 'height' : '30%'}}>
+            <div id='bottom' style={this._getHandPositions().bottom}>
                      <Hand hide={false} layout={this.state.layout} cards={this.state.hand} cardSize={1.5*this._getCardSize()}/>
              </div>
 
-             <div id='left' style={{'bottom': '40%','right': '90%', 'position': 'absolute', 'transform': 'rotate(90deg)' }}>
+             <div id='left' style={this._getHandPositions().left}>
                     <Hand hide={true} layout={this.state.layout} cards={this.state.hand} cardSize={0.8*this._getCardSize()}/>
 
              </div>
 
-              <div id='right' style={{'bottom': '40%','left': '90%', 'position': 'absolute', 'transform': 'rotate(270deg)' }}>
+              <div id='right' style={this._getHandPositions().right}>
                     <Hand hide={true} layout={this.state.layout} cards={this.state.hand} cardSize={0.8*this._getCardSize()}/>
 
              </div>
