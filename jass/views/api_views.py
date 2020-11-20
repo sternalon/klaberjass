@@ -29,7 +29,7 @@ class PlayerSeriesViewSet(viewsets.ViewSet):
     """
 
     def list(self, request):
-        queryset = Series.get_series_for_player(self.request.user)
+        queryset = Series.get_series_for_player(request.user)
         serializer = SeriesSerializer(
             queryset, many=True, context={'request': request})
         return Response(serializer.data)
