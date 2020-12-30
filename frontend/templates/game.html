@@ -1,7 +1,8 @@
-{% extends "base.html" %} {% load render_bundle from webpack_loader %}
+{% extends "base.html" %}
+{% load render_bundle from webpack_loader %}
 
 {% block page_javascript %}
-{% render_bundle 'game' %}
+    {% render_bundle 'game' %}
 {% endblock %}
 
 {% block main_content %}
