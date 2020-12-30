@@ -29,7 +29,18 @@ class PlayerSeriesViewSet(viewsets.ViewSet):
     """
 
     def list(self, request):
-        queryset = Series.get_series_for_player(self.request.user)
+        queryset = Series.get_series_for_player(request.user)
         serializer = SeriesSerializer(
             queryset, many=True, context={'request': request})
+        return Response(serializer.data)
+
+
+class AvailableSeriesViewSet(viewsets.ViewSet):
+    """
+    API endpoint for available/open series
+    """
+
+    def list(self, request):
+        queryset = Series.get_available_series()
+        serializer = SeriesSerializer(queryset, many=True)
         return Response(serializer.data)

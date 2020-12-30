@@ -6,6 +6,8 @@ module.exports = {
   entry: {
           lobby: './src/components/lobby/index.jsx',
           hello: './src/components/hello/index.js',
+          game: './src/components/game/index.jsx',
+          card: './src/components/card/index.jsx',
     },
     output: {
       path: path.resolve('./static/bundles/'),
@@ -27,7 +29,33 @@ module.exports = {
         use: {
           loader: "babel-loader"
         }
-      }
+      },
+      { test: /\.css$/, use: [
+          // style-loader
+          { loader: 'style-loader' },
+          // css-loader
+          {
+            loader: 'css-loader',
+            options: {
+              modules: true
+            }
+          },
+        ] },
+        {
+            test: /\.svg$/,
+            use: [
+              {
+                loader: 'svg-url-loader',
+//                options: {
+//                  limit: 10000,
+//                },
+              },
+            ],
+        },
+//        {
+//        test: /\.svg$/,
+//        loader: 'svg-inline-loader'
+//    },
     ]
   },
 

@@ -12,7 +12,7 @@ class PlayerSeries extends React.Component{
      this.onCreateSeriesClick = this.onCreateSeriesClick.bind(this);
      this.renderButton = this.renderButton.bind(this);
      this.renderPlayer = this.renderPlayer.bind(this)
-     this.playerInGame = this.playerInSeries.bind(this)
+     this.playerInSeries = this.playerInSeries.bind(this)
     }
 
     onCreateSeriesClick(event) {
@@ -35,8 +35,8 @@ class PlayerSeries extends React.Component{
          if (series.completed){
             return "View"
 //         } else if (series.opponent == null && series.creator.id == this.props.player.id){
-        } else if (series.players.length < 4 && this.playerInSeries(series)){
-            return "Waiting..."
+//         } else if (series.players.length < 4 && this.playerInSeries(series)){
+//             return "Waiting..."
          } else{
              return "Play"
          }
@@ -51,7 +51,7 @@ class PlayerSeries extends React.Component{
         if (player != null){
             return player.username
         } else {
-            return "???"
+            return "Player ".concat(position.toString())
         }
     }
 

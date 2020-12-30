@@ -4,13 +4,14 @@ import Websocket from 'react-websocket'
 import $ from 'jquery'
 import PropTypes from 'prop-types';
 import PlayerSeries from './PlayerSeries'
+import AvailableSeries from './AvailableSeries'
 
 
 class LobbyBase extends React.Component {
 
-    render() {
-        return <h1>LobbyBase World!</h1>
-    }
+//     render() {
+//         return <h1>LobbyBase World!</h1>
+//     }
 
     constructor(props) {
         super(props);
@@ -31,8 +32,17 @@ class LobbyBase extends React.Component {
         }.bind(this))
     }
 
+    getAvailableSeries(){
+        this.serverRequest = $.get('http://localhost:8080/available-series/?format=json', function (result) {
+           this.setState({
+            available_series_list: result
+             })
+        }.bind(this))
+    }
+
     componentDidMount() {
        this.getPlayerSeries()
+       this.getAvailableSeries()
     }
 
     componentWillUnmount() {
@@ -62,6 +72,10 @@ class LobbyBase extends React.Component {
                 <div className="col-lg-4">
                     <PlayerSeries player={this.props.current_user} series_list={this.state.player_series_list}
                                  sendSocketMessage={this.sendSocketMessage} />
+                </div>
+                <div className="col-lg-4">
+                     <AvailableSeries player={this.props.current_user} series_list={this.state.available_series_list}
+                                     sendSocketMessage={this.sendSocketMessage} />
                 </div>
             </div>
 

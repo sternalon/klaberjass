@@ -1,0 +1,26 @@
+{% extends "base.html" %}
+
+{% load static %}
+{% block additional_head %}
+    <link rel="stylesheet" href="{% static 'css/index.css' %}"/>
+    <link rel="stylesheet" href="{% static 'css/hand.css' %}"/>
+    <link rel="stylesheet" href="{% static 'css/PlayingCard.css' %}"/>
+
+{% endblock %}
+
+
+{% load render_bundle from webpack_loader %}
+
+
+{% block page_javascript %}
+
+    {% render_bundle 'card' %}
+
+{% endblock %}
+
+{% block main_content %}
+<!--    <h3>Let's play Jass, <span class="text-primary" >{{request.user.username}}</span>!</h3>-->
+<!--    <hr>-->
+    <div id="card_component"></div>
+
+{% endblock %}
