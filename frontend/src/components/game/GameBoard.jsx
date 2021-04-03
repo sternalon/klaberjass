@@ -2,6 +2,7 @@ import React from 'react'
 import PropTypes from 'prop-types';
 import $ from 'jquery'
 import Websocket from 'react-websocket'
+import Hand from "./react-playing-cards/src/PlayingCard/Hand/Hand";
 // import GameSquare from './GameSquare'
 
 
@@ -12,6 +13,9 @@ class GameBoard extends React.Component {
         this.state = {
             series: null,
             squares: null,
+            hand: ["2d", "2c", "2s", "2h", "2d", "2c", "2s", "2h"],
+            layout: "spread",
+            handSize: "8"
         }
 
         // bind button click
@@ -19,6 +23,7 @@ class GameBoard extends React.Component {
         this.isPlayerTurn = this.isPlayerTurn.bind(this)
 
     }
+
 
     componentDidMount() {
         this.getSeries()
@@ -28,11 +33,32 @@ class GameBoard extends React.Component {
         this.serverRequest.abort();
     }
 
+    _getCardSize() {
+//         console.log("window: ", window.innerWidth);
+//         console.log('handsize', this.state.hand.length)
+//         console.log("size: ", window.innerWidth / this.state.hand.length)
+        let cardSize = window.innerWidth / this.state.hand.length;
+        return this.state.layout !== "spread" || cardSize > 100 ? 100 : cardSize;
+    }
+
+    _getHandPositions() {
+        return {
+            top:{'transform' : 'translateY(-30%) rotate(180deg)', 'right': '50%', 'top': "5%", 'position': 'absolute'},
+            bottom:{'bottom': '-5%', 'right': '50%', 'position': 'absolute', 'height' : '30%'},
+            left:{'bottom': '40%','right': '90%', 'position': 'absolute', 'transform': 'rotate(90deg)' },
+            right:{'bottom': '40%','left': '90%', 'position': 'absolute', 'transform': 'rotate(270deg)' }
+
+            }
+
+           }
+
     // custom methods
     getSeries(){
-         const game_url = 'http://localhost:8080/series-from-id/' + this.props.series_id
+         const series_url = 'http://127.0.0.1:8000/series-from-id/' + this.props.series_id
 
-         this.serverRequest = $.get(game_url, function (result) {
+         this.serverRequest = $.get(series_url, function (result) {
+
+            console.log("AAAAAA", result)
 
             this.setState({
                 series: result.series,
@@ -41,14 +67,6 @@ class GameBoard extends React.Component {
         }.bind(this))
     }
 
-    getSquares(){
-         const squares_url = 'http://localhost:8080/game-squares/' + this.props.game_id
-         this.serverRequest = $.get(squares_url, function (result) {
-            this.setState({
-                squares: result
-            })
-        }.bind(this))
-    }
 
 
     handleData(data) {
@@ -132,8 +150,36 @@ class GameBoard extends React.Component {
         }
         return board
 
-
     }
+
+    renderDeck() {
+
+      return (
+          <div>
+
+
+            <div id='top' style={this._getHandPositions().top}>
+                    <Hand hide={true} layout={this.state.layout} cards={this.state.hand} cardSize={1.2*this._getCardSize()}/>
+             </div>
+
+
+            <div id='bottom' style={this._getHandPositions().bottom}>
+                     <Hand hide={false} layout={this.state.layout} cards={this.state.hand} cardSize={1.5*this._getCardSize()}/>
+             </div>
+
+             <div id='left' style={this._getHandPositions().left}>
+                    <Hand hide={true} layout={this.state.layout} cards={this.state.hand} cardSize={0.8*this._getCardSize()}/>
+
+             </div>
+
+              <div id='right' style={this._getHandPositions().right}>
+                    <Hand hide={true} layout={this.state.layout} cards={this.state.hand} cardSize={0.8*this._getCardSize()}/>
+
+             </div>
+
+          </div>
+      );
+  }
 
     currentTurn(){
         if (this.state.game){
@@ -151,17 +197,15 @@ class GameBoard extends React.Component {
 
 
     render() {
+
+
         return (
             <div className="row">
-                <div className="col-sm-6">
+                    {this.getSeries()}
+
                     {this.currentTurn()}
-                    <table>
-                        <tbody>
-                        { this.renderBoard() }
-                        </tbody>
-                    </table>
-                </div>
-            <div className="col-sm-6"></div>
+
+                    { this.renderDeck() }
 
             <Websocket ref="socket" url={this.props.socket}
                     onMessage={this.handleData.bind(this)} reconnect={true}/>

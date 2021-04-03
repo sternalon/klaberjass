@@ -44,3 +44,18 @@ class AvailableSeriesViewSet(viewsets.ViewSet):
         queryset = Series.get_available_series()
         serializer = SeriesSerializer(queryset, many=True)
         return Response(serializer.data)
+
+
+class SingleSeriesViewSet(APIView):
+    """
+    Get all data for a series: Series Details, Current Game
+    """
+
+    def get(self, request, **kwargs):
+        series = Series.get_by_id(kwargs['series_id'])
+        # squares = game.get_all_game_squares()
+        series_serializer = SeriesSerializer(series)
+        # square_serializer = GameSquareSerializer(squares, many=True)
+        return_data = {'series': series_serializer.data}
+                       #, 'squares': square_serializer.data}
+        return Response(return_data)

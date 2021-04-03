@@ -5,3 +5,4 @@ django-webpack-loader==0.7.0
 coverage==5.1
 djangorestframework==3.11.0
 #channels_redis==3.0.0
+django-cors-headers==3.7.0
