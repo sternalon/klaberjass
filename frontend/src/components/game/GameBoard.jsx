@@ -14,6 +14,7 @@ class GameBoard extends React.Component {
             series: null,
             position: null,
             current_user: props.current_user,
+            players: null,
             hand: {
                 cards: ["2d", "2c", "2s", "2h", "2d", "2c", "2s", "2h"],
                 layout: "spread",
@@ -50,9 +51,16 @@ class GameBoard extends React.Component {
             bottom:{'bottom': '-5%', 'right': '50%', 'position': 'absolute', 'height' : '30%'},
             left:{'bottom': '40%','right': '90%', 'position': 'absolute', 'transform': 'rotate(90deg)' },
             right:{'bottom': '40%','left': '90%', 'position': 'absolute', 'transform': 'rotate(270deg)' }
-
             }
+           }
 
+     _getNamePositions() {
+        return {
+            top:{'right': '50%', 'top': "3%", 'position': 'absolute'},
+            bottom:{'bottom': '-22%', 'right': '50%', 'position': 'absolute', 'height' : '30%'},
+            left: {'bottom': '40%','right': '90%', 'position': 'absolute', 'transform': 'rotate(270deg)' },
+            right:{'bottom': '40%','left': '90%', 'position': 'absolute', 'transform': 'rotate(90deg)' }
+            }
            }
 
     // custom methods
@@ -61,7 +69,8 @@ class GameBoard extends React.Component {
          this.serverRequest = $.get(series_url, function (result) {
             this.setState({
                 series: result.series,
-                position: this.getPosition(result.series.players)
+                position: this.getPosition(result.series.players),
+                players: this.getPlayerOrder(result.series.players)
             })
         }.bind(this))
     }
@@ -72,6 +81,23 @@ class GameBoard extends React.Component {
                 return players[i].position
             }
         }
+    }
+
+    getPlayerOrder(players){
+        var player_position = this.getPosition(players)
+        var player_order = [];
+
+        for (let i = 0; i < players.length; i++) {
+            if (players[i].position >= player_position){
+                player_order.push(players[i].username)
+            }
+        }
+        for (let i = 0; i < players.length; i++) {
+            if (players[i].position < player_position){
+                player_order.push(players[i].username)
+            }
+        }
+        return player_order
     }
 
 
@@ -158,6 +184,30 @@ class GameBoard extends React.Component {
 
     }
 
+
+    renderNames() {
+        if (this.state.players) {
+              return (
+                  <div>
+                    <div id='top' style={this._getNamePositions().top}>
+                        <h2>{this.state.players[2]}</h2>
+                     </div>
+                    <div id='bottom' style={this._getNamePositions().bottom}>
+                             <h2> {this.state.players[0]}</h2>
+                     </div>
+                     <div id='left' style={this._getNamePositions().left}>
+                           <h2>{this.state.players[1]}</h2>
+                     </div>
+                      <div id='right' style={this._getHandPositions().right}>
+                             <h2>{this.state.players[3]}</h2>
+                     </div>
+                  </div>
+              );
+            }
+
+         return (<div> </div>)
+    }
+
     renderDeck() {
 
       return (
@@ -205,15 +255,16 @@ class GameBoard extends React.Component {
     render() {
         console.log("BBBBB", this)
 
-
-
         return (
             <div className="row">
+
+                   { this.renderNames() }
+                   {this.renderDeck()}
 
 
                     {this.currentTurn()}
 
-                    { this.renderDeck() }
+
 
             <Websocket ref="socket" url={this.props.socket}
                     onMessage={this.handleData.bind(this)} reconnect={true}/>
