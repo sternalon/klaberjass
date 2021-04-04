@@ -14,7 +14,6 @@ class GameBoard extends React.Component {
             series: null,
             position: null,
             current_user: props.current_user,
-            players: null,
             hand: {
                 cards: ["2d", "2c", "2s", "2h", "2d", "2c", "2s", "2h"],
                 layout: "spread",
