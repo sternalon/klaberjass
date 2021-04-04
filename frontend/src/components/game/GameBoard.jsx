@@ -70,7 +70,6 @@ class GameBoard extends React.Component {
             this.setState({
                 series: result.series,
                 position: this.getPosition(result.series.players),
-                players: this.getPlayerOrder(result.series.players)
             })
         }.bind(this))
     }
@@ -81,23 +80,6 @@ class GameBoard extends React.Component {
                 return players[i].position
             }
         }
-    }
-
-    getPlayerOrder(players){
-        var player_position = this.getPosition(players)
-        var player_order = [];
-
-        for (let i = 0; i < players.length; i++) {
-            if (players[i].position >= player_position){
-                player_order.push(players[i].username)
-            }
-        }
-        for (let i = 0; i < players.length; i++) {
-            if (players[i].position < player_position){
-                player_order.push(players[i].username)
-            }
-        }
-        return player_order
     }
 
 
@@ -184,28 +166,41 @@ class GameBoard extends React.Component {
 
     }
 
+    getPlayerName(position){
+        var position_mod_4 = position % 4
+        if (this.state.series.players[position_mod_4]){
+            return this.state.series.players[position_mod_4].username
+           }else{
+               return null
+           }
+    }
+
 
     renderNames() {
-        if (this.state.players) {
+        var player_position = this.state.position -1
+        if (this.state.series) {
               return (
                   <div>
-                    <div id='top' style={this._getNamePositions().top}>
-                        <h2>{this.state.players[2]}</h2>
-                     </div>
+
                     <div id='bottom' style={this._getNamePositions().bottom}>
-                             <h2> {this.state.players[0]}</h2>
-                     </div>
+                             <h2> {this.getPlayerName(player_position)}</h2>
+                    </div>
                      <div id='left' style={this._getNamePositions().left}>
-                           <h2>{this.state.players[1]}</h2>
+                           <h2> {this.getPlayerName(player_position+1)}</h2>
                      </div>
+
+                    <div id='top' style={this._getNamePositions().top}>
+                       <h2> {this.getPlayerName(player_position+2)}</h2>
+                     </div>
+
                       <div id='right' style={this._getHandPositions().right}>
-                             <h2>{this.state.players[3]}</h2>
+                             <h2> {this.getPlayerName(player_position+3)}</h2>
                      </div>
                   </div>
               );
-            }
-
+            }else{
          return (<div> </div>)
+         }
     }
 
     renderDeck() {
