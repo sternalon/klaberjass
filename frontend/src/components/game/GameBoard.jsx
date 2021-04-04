@@ -13,6 +13,7 @@ class GameBoard extends React.Component {
         this.state = {
             series: null,
             position: null,
+            players: null,
             current_user: props.current_user,
             hand: {
                 cards: ["2d", "2c", "2s", "2h", "2d", "2c", "2s", "2h"],
@@ -69,6 +70,7 @@ class GameBoard extends React.Component {
             this.setState({
                 series: result.series,
                 position: this.getPosition(result.series.players),
+                players: result.series.players,
             })
         }.bind(this))
     }
@@ -167,8 +169,8 @@ class GameBoard extends React.Component {
 
     getPlayerName(position){
         var position_mod_4 = position % 4
-        if (this.state.series.players[position_mod_4]){
-            return this.state.series.players[position_mod_4].username
+        if (this.state.players[position_mod_4]){
+            return this.state.players[position_mod_4].username
            }else{
                return null
            }
@@ -177,7 +179,7 @@ class GameBoard extends React.Component {
 
     renderNames() {
         var player_position = this.state.position -1
-        if (this.state.series) {
+        if (this.state.players) {
               return (
                   <div>
 
@@ -200,6 +202,25 @@ class GameBoard extends React.Component {
             }else{
          return (<div> </div>)
          }
+    }
+
+    renderDealOrLoading() {
+            if (this.state.players){
+                if (this.state.players.length==4){
+                    return (
+                        <div id='center' style={{'top': '50%', 'left': '40%', 'position': 'fixed'}}>
+                        <a className="btn btn btn-danger btn-lg" href={"/tests/"}>Click here to Deal!</a>
+                        </div>
+                        )
+                }
+           }
+
+           return (
+          <div id='center' style={{'top': '50%', 'left': '35%', 'position': 'fixed'}}>
+                        <a className="btn btn btn-info btn-lg" href={"/tests/"}>Waiting for players to join</a>
+           </div>
+         )
+
     }
 
     renderDeck() {
@@ -252,8 +273,11 @@ class GameBoard extends React.Component {
         return (
             <div className="row">
 
-                   { this.renderNames() }
-                   {this.renderDeck()}
+                   {this.renderNames()}
+                   {this.renderDealOrLoading()}
+
+
+
 
 
                     {this.currentTurn()}
