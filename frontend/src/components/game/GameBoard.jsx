@@ -12,7 +12,8 @@ class GameBoard extends React.Component {
         super(props)
         this.state = {
             series: null,
-            squares: null,
+            position: null,
+            current_user: props.current_user,
             hand: ["2d", "2c", "2s", "2h", "2d", "2c", "2s", "2h"],
             layout: "spread",
             handSize: "8"
@@ -55,18 +56,21 @@ class GameBoard extends React.Component {
     // custom methods
     getSeries(){
          const series_url = 'http://127.0.0.1:8000/series-from-id/' + this.props.series_id
-
          this.serverRequest = $.get(series_url, function (result) {
-
-            console.log("AAAAAA", result)
-
             this.setState({
                 series: result.series,
-                squares: result.squares
+                position: this.getPosition(result.series.players)
             })
         }.bind(this))
     }
 
+     getPosition(players){
+        for (let i = 0; i < players.length; i++) {
+            if (players[i].username == this.state.current_user.username){
+                return players[i].position
+            }
+        }
+    }
 
 
     handleData(data) {
@@ -197,11 +201,13 @@ class GameBoard extends React.Component {
 
 
     render() {
+        console.log("BBBBB", this)
+
 
 
         return (
             <div className="row">
-                    {this.getSeries()}
+
 
                     {this.currentTurn()}
 
