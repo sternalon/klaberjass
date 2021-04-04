@@ -14,9 +14,11 @@ class GameBoard extends React.Component {
             series: null,
             position: null,
             current_user: props.current_user,
-            hand: ["2d", "2c", "2s", "2h", "2d", "2c", "2s", "2h"],
-            layout: "spread",
-            handSize: "8"
+            hand: {
+                cards: ["2d", "2c", "2s", "2h", "2d", "2c", "2s", "2h"],
+                layout: "spread",
+                handSize: "8",
+            },
         }
 
         // bind button click
@@ -38,8 +40,8 @@ class GameBoard extends React.Component {
 //         console.log("window: ", window.innerWidth);
 //         console.log('handsize', this.state.hand.length)
 //         console.log("size: ", window.innerWidth / this.state.hand.length)
-        let cardSize = window.innerWidth / this.state.hand.length;
-        return this.state.layout !== "spread" || cardSize > 100 ? 100 : cardSize;
+        let cardSize = window.innerWidth / this.state.hand.cards.length;
+        return this.state.hand.layout !== "spread" || cardSize > 100 ? 100 : cardSize;
     }
 
     _getHandPositions() {
@@ -163,21 +165,21 @@ class GameBoard extends React.Component {
 
 
             <div id='top' style={this._getHandPositions().top}>
-                    <Hand hide={true} layout={this.state.layout} cards={this.state.hand} cardSize={1.2*this._getCardSize()}/>
+                    <Hand hide={true} layout={this.state.hand.layout} cards={this.state.hand.cards} cardSize={1.2*this._getCardSize()}/>
              </div>
 
 
             <div id='bottom' style={this._getHandPositions().bottom}>
-                     <Hand hide={false} layout={this.state.layout} cards={this.state.hand} cardSize={1.5*this._getCardSize()}/>
+                     <Hand hide={false} layout={this.state.hand.layout} cards={this.state.hand.cards} cardSize={1.5*this._getCardSize()}/>
              </div>
 
              <div id='left' style={this._getHandPositions().left}>
-                    <Hand hide={true} layout={this.state.layout} cards={this.state.hand} cardSize={0.8*this._getCardSize()}/>
+                    <Hand hide={true} layout={this.state.hand.layout} cards={this.state.hand.cards} cardSize={0.8*this._getCardSize()}/>
 
              </div>
 
               <div id='right' style={this._getHandPositions().right}>
-                    <Hand hide={true} layout={this.state.layout} cards={this.state.hand} cardSize={0.8*this._getCardSize()}/>
+                    <Hand hide={true} layout={this.state.hand.layout} cards={this.state.hand.cards} cardSize={0.8*this._getCardSize()}/>
 
              </div>
 
