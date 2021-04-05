@@ -31,6 +31,11 @@ class Series(models.Model):
     def get_by_id(id):
         return Series.objects.get(id=id)
 
+    def get_users_in_series(self):
+        series_players = list(SeriesPlayer.objects.filter(series=self).order_by("position"))
+        users = [series_player.user for series_player in series_players]
+        return users
+
     def player_in_series(self, user):
         ''' Returns true if player is in series'''
         return len(list(SeriesPlayer.objects.filter(user=user, series=self)))>0
@@ -53,6 +58,9 @@ class Series(models.Model):
         else:
             SeriesPlayer.objects.create(user= user, position= position, series= self)
 
+
+
+
 class SeriesPlayer(models.Model):
     user = models.ForeignKey(User,on_delete=models.CASCADE)
     position = models.SmallIntegerField()
@@ -73,9 +81,25 @@ class Game(models.Model):
     completed = models.BooleanField(default=False)
     series = models.ForeignKey(Series, on_delete=models.CASCADE, null=True)
     trumps = models.CharField(choices=SUITS, max_length=7)
+    number = models.SmallIntegerField(null=True)
     created = models.DateTimeField(auto_now_add=True)
     modified = models.DateTimeField(auto_now=True)
 
+    @staticmethod
+    def create_game_from_series(series_id):
+        #TODO: What if series does not exist? (perhaps handle in view)
+        series = Series.get_by_id(series_id)
+
+        if len(Game.objects.filter(series=series, completed=False)):
+            return "Series game in progress"
+        else:
+            game = Game.objects.create()
+            game.series = series
+            game.game_type = series.game_type
+            game.number = len(Game.objects.filter(series=series, completed=True)) + 1
+            users = series.get_users_in_series()
+            game.begin(users)
+            game.save()
 
     def begin(self, users):
         self._set_players(users)
