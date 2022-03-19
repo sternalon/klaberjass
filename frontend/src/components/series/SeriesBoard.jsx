@@ -274,8 +274,6 @@ class SeriesBoard extends React.Component {
 
 
     render() {
-        console.log("BBBBB", this)
-
         return (
             <div className="row">
 
@@ -298,10 +296,9 @@ class SeriesBoard extends React.Component {
 }
 
 SeriesBoard.propTypes = {
+    current_user: PropTypes.object,
     series_id: PropTypes.number,
-    socket: PropTypes.string,
-    current_user: PropTypes.object
-
+    socket: PropTypes.string
 }
 
 export default SeriesBoard

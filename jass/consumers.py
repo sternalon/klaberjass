@@ -62,29 +62,29 @@ class SeriesConsumer(JsonWebsocketConsumer):
     # Set to True to automatically port users from HTTP cookies
     # (you don't need channel_session_user, this implies it)
     http_user = True
+    print("AAAAAAA")
 
-    def connection_groups(self, **kwargs):
-        """
-        Called to return the list of groups to automatically add/remove
-        this connection to/from.
-        """
-        # this sets the game group name, so we can communicate directly with
-        # those channels in the game
-        return ["series-{0}".format(kwargs['series_id'])]
-
-    def connect(self, message, **kwargs):
-        """
-        Perform things on connection start
-        """
-        self.message.reply_channel.send({"accept": True})
-        pass
+    # def connection_groups(self, **kwargs):
+    #     """
+    #     Called to return the list of groups to automatically add/remove
+    #     this connection to/from.
+    #     """
+    #     # this sets the game group name, so we can communicate directly with
+    #     # those channels in the game
+    #     return ["series-{0}".format(kwargs['series_id'])]
+    #
+    # def connect(self, message, **kwargs):
+    #     """
+    #     Perform things on connection start
+    #     """
+    #     self.message.reply_channel.send({"accept": True})
+    #     pass
 
     def receive(self, content, **kwargs):
         """
         Called when a message is received with either text or bytes
         filled out.
         """
-        print("YOYLYOYOYOYOOYOYOY")
         # include the Django user in the request
         channel_session_user = True
         action = content['action']
@@ -103,7 +103,8 @@ class SeriesConsumer(JsonWebsocketConsumer):
             game.send_game_update()
 
         if action == 'create_game':
-            game = Game.create_game_from_series(content['series_id'])
+            print("YOYLYOYOYOYOOYOYOY")
+            # game = Game.create_game_from_series(content['series_id'])
 
 
     # def disconnect(self, message, **kwargs):
