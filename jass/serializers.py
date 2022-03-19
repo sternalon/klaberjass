@@ -12,7 +12,7 @@ class UserSerializer(serializers.ModelSerializer):
 class PlayingCardSerializer(serializers.ModelSerializer):
     class Meta:
         model = PlayingCard
-        fields = ('id', 'player', 'game', 'trick', 'order_in_trick')
+        fields = ('id', 'player', 'game', 'trick', 'order_in_trick','played')
 
 class GameSerializer(serializers.ModelSerializer):
     cards = PlayingCardSerializer(many=True)
