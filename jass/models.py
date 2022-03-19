@@ -101,7 +101,7 @@ class Game(models.Model):
 
     game_type = models.CharField(choices=GAMES, default=KLABBERJASS, max_length=12)
     completed = models.BooleanField(default=False)
-    series = models.ForeignKey(Series, on_delete=models.CASCADE, null=True)
+    series = models.ForeignKey(Series,  related_name="games", on_delete=models.CASCADE, null=True)
     trumps = models.CharField(choices=SUITS, max_length=7)
     number = models.SmallIntegerField(null=True)
     created = models.DateTimeField(auto_now_add=True)
@@ -280,7 +280,7 @@ class Trick(models.Model):
 class PlayingCard(models.Model):
     card = CardField()
     played = models.BooleanField(default=False)
-    game = models.ForeignKey(Game, on_delete=models.CASCADE)
+    game = models.ForeignKey(Game, related_name="cards", on_delete=models.CASCADE)
     player = models.ForeignKey(Player, on_delete=models.CASCADE)
     trick = models.ForeignKey(Trick, on_delete=models.SET_NULL, null=True)
     order_in_trick = models.SmallIntegerField(null=True)
