@@ -1,5 +1,5 @@
 import React from 'react';
-import GameBoard from './GameBoard.jsx'
+import SeriesBoard from './SeriesBoard.jsx'
 import ReactDOM from 'react-dom'
 import $ from 'jquery'
 
@@ -15,6 +15,6 @@ $.get('http://127.0.0.1:8000/current-user/?format=json', function(result){
 
 
 function render_component(){
-    ReactDOM.render(<GameBoard current_user={current_user} series_id={series} socket={series_sock}/>, document.getElementById("series_component"))
+    ReactDOM.render(<SeriesBoard current_user={current_user} series_id={series} socket={series_sock}/>, document.getElementById("series_component"))
     }
 

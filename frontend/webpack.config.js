@@ -7,7 +7,7 @@ module.exports = {
   entry: {
           lobby: './src/components/lobby/index.jsx',
           hello: './src/components/hello/index.js',
-          game: './src/components/game/index.jsx',
+          series: './src/components/series/index.jsx',
           card: './src/components/card/index.jsx',
     },
     output: {

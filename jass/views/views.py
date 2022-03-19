@@ -60,7 +60,7 @@ class LobbyView(TemplateView):
 
 
 class SeriesView(TemplateView):
-    template_name = 'game.html'
+    template_name = 'series.html'
     series = None
 
     @method_decorator(login_required)

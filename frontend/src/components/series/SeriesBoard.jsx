@@ -6,7 +6,7 @@ import Hand from "./react-playing-cards/src/PlayingCard/Hand/Hand";
 // import GameSquare from './GameSquare'
 
 
-class GameBoard extends React.Component {
+class SeriesBoard extends React.Component {
     // lifecycle methods
     constructor(props) {
         super(props)
@@ -297,11 +297,11 @@ class GameBoard extends React.Component {
     }
 }
 
-GameBoard.propTypes = {
-    game_id: PropTypes.number,
+SeriesBoard.propTypes = {
+    series_id: PropTypes.number,
     socket: PropTypes.string,
     current_user: PropTypes.object
 
 }
 
-export default GameBoard
+export default SeriesBoard
