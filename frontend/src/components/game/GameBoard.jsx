@@ -23,7 +23,9 @@ class GameBoard extends React.Component {
         }
 
         // bind button click
-        this.sendSocketMessage = this.sendSocketMessage.bind(this)
+        this.onCreateGameClick = this.onCreateGameClick.bind(this);
+        this.sendSocketMessage = this.sendSocketMessage.bind(this);
+
         this.isPlayerTurn = this.isPlayerTurn.bind(this)
 
     }
@@ -31,6 +33,10 @@ class GameBoard extends React.Component {
 
     componentDidMount() {
         this.getSeries()
+    }
+
+    onCreateGameClick(event) {
+        this.sendSocketMessage({action: "create_game", series_id: this.state.series.series_id})
     }
 
     componentWillUnmount() {
@@ -209,7 +215,7 @@ class GameBoard extends React.Component {
                 if (this.state.players.length==4){
                     return (
                         <div id='center' style={{'top': '50%', 'left': '40%', 'position': 'fixed'}}>
-                        <a className="btn btn btn-danger btn-lg" href={"/tests/"}>Click here to Deal!</a>
+                        <a className="btn btn btn-danger btn-lg" href="" onClick={this.onCreateGameClick} id="create_game">Click here to Deal!</a>
                         </div>
                         )
                 }
@@ -217,7 +223,7 @@ class GameBoard extends React.Component {
 
            return (
           <div id='center' style={{'top': '50%', 'left': '35%', 'position': 'fixed'}}>
-                        <a className="btn btn btn-info btn-lg" href={"/tests/"}>Waiting for players to join</a>
+                        <a className="btn btn btn-info btn-lg" href={"."}>Refresh to see if players have joined</a>
            </div>
          )
 

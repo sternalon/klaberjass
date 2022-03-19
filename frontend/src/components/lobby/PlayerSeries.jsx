@@ -34,6 +34,7 @@ class PlayerSeries extends React.Component{
     renderButton(series){
          if (series.completed){
             return "View"
+// TODO: I think that these lines and playerInSeries can be removed.
 //         } else if (series.opponent == null && series.creator.id == this.props.player.id){
 //         } else if (series.players.length < 4 && this.playerInSeries(series)){
 //             return "Waiting..."
