@@ -58,7 +58,29 @@ class Series(models.Model):
         else:
             SeriesPlayer.objects.create(user= user, position= position, series= self)
 
-
+    def send_series_update(self):
+        """
+        Send the updated series information to the series's channel group
+        """
+        pass
+        # # imported here to avoid circular import
+        # from serializers import GameSquareSerializer, GameLogSerializer, GameSerializer
+        #
+        # squares = self.get_all_game_squares()
+        # square_serializer = GameSquareSerializer(squares, many=True)
+        #
+        # # get game log
+        # log = self.get_game_log()
+        # log_serializer = GameLogSerializer(log, many=True)
+        #
+        # game_serilizer = GameSerializer(self)
+        #
+        # message = {'game': game_serilizer.data,
+        #            'log': log_serializer.data,
+        #            'squares': square_serializer.data}
+        #
+        # game_group = 'game-{0}'.format(self.id)
+        # Group(game_group).send({'text': json.dumps(message)})
 
 
 class SeriesPlayer(models.Model):
@@ -87,10 +109,9 @@ class Game(models.Model):
 
     @staticmethod
     def create_game_from_series(series_id):
-        #TODO: What if series does not exist? (perhaps handle in view)
         series = Series.get_by_id(series_id)
 
-        if len(Game.objects.filter(series=series, completed=False)):
+        if len(Game.objects.filter(series=series, completed=False))>0:
             return "Series game in progress"
         else:
             game = Game.objects.create()

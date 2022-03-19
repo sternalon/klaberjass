@@ -44,7 +44,6 @@ class LobbyConsumer(JsonWebsocketConsumer):
         action = content['action']
         if action == 'create_series':
             # create a new game using the part of the channel name
-
             Series.create_series(self.scope["user"])
 
     def lobby_send(self, event):
@@ -62,7 +61,6 @@ class SeriesConsumer(JsonWebsocketConsumer):
     # Set to True to automatically port users from HTTP cookies
     # (you don't need channel_session_user, this implies it)
     http_user = True
-    print("AAAAAAA")
 
     # def connection_groups(self, **kwargs):
     #     """
@@ -80,31 +78,50 @@ class SeriesConsumer(JsonWebsocketConsumer):
     #     self.message.reply_channel.send({"accept": True})
     #     pass
 
-    def receive(self, content, **kwargs):
+
+    def receive_json(self, content=None, **kwargs):
         """
         Called when a message is received with either text or bytes
         filled out.
         """
-        # include the Django user in the request
         channel_session_user = True
+        http_user = True
+        series_id = self.scope["url_route"]["kwargs"]["series_id"]
+
+        # get the action that's coming in
         action = content['action']
-
-        # handle based on the specific action called
-        if action == 'claim_square':
-            # get the square object
-            square = GameSquare.get_by_id(content['square_id'])
-            # claim it for the user
-            square.claim('Selected', self.message.user)
-
-        if action == 'chat_text_entered':
-            # chat text
-            game = Game.get_by_id(content['game_id'])
-            game.add_log(content['text'], self.message.user)
-            game.send_game_update()
-
         if action == 'create_game':
-            print("YOYLYOYOYOYOOYOYOY")
-            # game = Game.create_game_from_series(content['series_id'])
+            # create the next game in the series
+            Game.create_game_from_series(series_id)
+            series = Series.get_by_id(series_id)
+            # series.send_series_update()
+            print("BBBBB", series.id)
+
+    # def receive(self, content, **kwargs):
+    #     """
+    #     Called when a message is received with either text or bytes
+    #     filled out.
+    #     """
+    #     # include the Django user in the request
+    #     channel_session_user = True
+    #     action = content['action']
+    #
+    #     # handle based on the specific action called
+    #     if action == 'claim_square':
+    #         # get the square object
+    #         square = GameSquare.get_by_id(content['square_id'])
+    #         # claim it for the user
+    #         square.claim('Selected', self.message.user)
+    #
+    #     if action == 'chat_text_entered':
+    #         # chat text
+    #         game = Game.get_by_id(content['game_id'])
+    #         game.add_log(content['text'], self.message.user)
+    #         game.send_game_update()
+    #
+    #     if action == 'create_game':
+    #         print("YOYLYOYOYOYOOYOYOY")
+    #         # game = Game.create_game_from_series(content['series_id'])
 
 
     # def disconnect(self, message, **kwargs):
