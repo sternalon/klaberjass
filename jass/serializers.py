@@ -1,5 +1,5 @@
 from django.contrib.auth.models import User
-from .models import Game, Series, SeriesPlayer, PlayingCard, Trick
+from .models import Game, Series, SeriesPlayer, PlayingCard, Trick, Player
 from rest_framework import serializers
 from .utils import Card
 
@@ -25,6 +25,21 @@ class PlayingCardSerializer(serializers.ModelSerializer):
         model = PlayingCard
         fields = ('id', 'suit', 'number', 'player', 'game', 'trick', 'order_in_trick', 'played')
 
+
+class PlayerSerializer(serializers.ModelSerializer):
+    hand = serializers.SerializerMethodField()
+
+    def get_hand(self, obj):
+
+        hand = obj.get_hand()
+        hand = [PlayingCardSerializer(card).data for card in hand]
+        return hand
+
+    class Meta:
+        model = Player
+        fields = ('id', 'user', 'position', 'game', 'hand')
+
+
 class TrickSerializer(serializers.ModelSerializer):
     class Meta:
         model = Trick
@@ -33,6 +48,8 @@ class TrickSerializer(serializers.ModelSerializer):
 class GameSerializer(serializers.ModelSerializer):
     cards = PlayingCardSerializer(many=True)
     tricks = TrickSerializer(many=True)
+    players = PlayerSerializer(many= True)
+
     # TODO: Might want to only return the currrent trick is performance is slow
     # current_trick = serializers.SerializerMethodField()
 
@@ -42,7 +59,7 @@ class GameSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Game
-        fields = ('id', 'number', 'game_type', 'trumps', 'completed', 'cards', 'tricks')
+        fields = ('id', 'number', 'game_type', 'trumps', 'completed', 'cards', 'tricks', 'players')
         depth = 2
 
 class SeriesPlayersSerializer(serializers.ModelSerializer):

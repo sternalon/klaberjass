@@ -191,7 +191,7 @@ class Game(models.Model):
 class Player(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE)
     position = models.SmallIntegerField()
-    game = models.ForeignKey(Game, on_delete=models.CASCADE)
+    game = models.ForeignKey(Game, related_name="players", on_delete=models.CASCADE)
 
     class Meta:
         unique_together = ('game', 'position', )
