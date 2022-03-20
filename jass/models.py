@@ -58,6 +58,14 @@ class Series(models.Model):
         else:
             SeriesPlayer.objects.create(user= user, position= position, series= self)
 
+    def get_current_game(self):
+        games = Game.objects.filter(series=self).order_by('number')
+        N = len(games)
+        if len(games)>0:
+            return games[N-1]
+        else:
+            return None
+
     def send_series_update(self):
         """
         Send the updated series information to the series's channel group

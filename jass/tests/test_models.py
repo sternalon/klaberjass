@@ -225,6 +225,9 @@ class TestCreateJassSeries(TestCase):
         series.add_player(self.user_3, position=3)
         series.add_player(self.user_4, position=4)
 
+        current_game = series.get_current_game()
+        self.assertEqual(current_game, None)
+
         Game.create_game_from_series(series.id)
         game = Game.objects.get(series=series)
 
@@ -241,6 +244,9 @@ class TestCreateJassSeries(TestCase):
         Game.create_game_from_series(series.id)
         game = Game.objects.get(series=series, number=2)
         self.assertEqual(game.number, 2)
+
+        current_game = series.get_current_game()
+        self.assertEqual(current_game, game)
 
 
 
