@@ -242,7 +242,7 @@ class CardField(models.PositiveIntegerField):
     #     return ???
 
 class Trick(models.Model):
-    game = models.ForeignKey(Game, on_delete=models.CASCADE)
+    game = models.ForeignKey(Game, related_name="tricks", on_delete=models.CASCADE)
     winner = models.ForeignKey(Player, on_delete=models.CASCADE, null = True)
     number = models.SmallIntegerField()
 
@@ -290,7 +290,7 @@ class PlayingCard(models.Model):
     played = models.BooleanField(default=False)
     game = models.ForeignKey(Game, related_name="cards", on_delete=models.CASCADE)
     player = models.ForeignKey(Player, on_delete=models.CASCADE)
-    trick = models.ForeignKey(Trick, on_delete=models.SET_NULL, null=True)
+    trick = models.ForeignKey(Trick, related_name="cards", on_delete=models.SET_NULL, null=True)
     order_in_trick = models.SmallIntegerField(null=True)
 
     class Meta:
