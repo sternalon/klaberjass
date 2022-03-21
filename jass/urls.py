@@ -16,7 +16,9 @@ urlpatterns = [
 # urls for api - django rest framework
 urlpatterns += [
     path('current-user/', CurrentUserView.as_view()),
+    path('series-from-id/<int:series_id>/', SingleSeriesViewSet.as_view()),
 ]
+
 router = DefaultRouter()
 router.register(r'player-series', PlayerSeriesViewSet, 'player_series')
 router.register(r'available-series', AvailableSeriesViewSet, 'available_series')

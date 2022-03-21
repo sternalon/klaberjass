@@ -25,6 +25,10 @@ class AvailableSeries extends React.Component {
         return player != null
         }
 
+    SeriesIsFull(series){
+        return series.players.length == 4
+        }
+
     renderPlayer(series, position){
          var player = series.players.find(obj => {
             return obj.position === position
@@ -41,8 +45,7 @@ class AvailableSeries extends React.Component {
     renderSeriesList() {
         // clear out series owned by this player
         let player_removed = this.props.series_list.filter(function(series) {
-//             return series.creator.id !== this.props.player.id
-            return ! this.playerInSeries(series)
+            return (! this.playerInSeries(series)) &&  (! this.SeriesIsFull(series))
         }, this);
 
 

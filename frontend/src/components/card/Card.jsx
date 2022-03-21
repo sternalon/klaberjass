@@ -15,9 +15,9 @@ handSize: "8" }
 
 
     _getCardSize() {
-        console.log("window: ", window.innerWidth);
-        console.log('handsize', this.state.hand.length)
-        console.log("size: ", window.innerWidth / this.state.hand.length)
+//         console.log("window: ", window.innerWidth);
+//         console.log('handsize', this.state.hand.length)
+//         console.log("size: ", window.innerWidth / this.state.hand.length)
         let cardSize = window.innerWidth / this.state.hand.length;
         return this.state.layout !== "spread" || cardSize > 100 ? 100 : cardSize;
     }

@@ -162,7 +162,7 @@ class TestCreateJassGame(TestCase):
         self.assertFalse(valid)
         self.assertTrue(message == "Invalid Play: Card belongs to incorrect game")
 
-class TestCreateJassGame(TestCase):
+class TestCreateJassSeries(TestCase):
 
     def setUp(self):
         self.user_1 = User.objects.create_user(username='user1')
@@ -179,6 +179,8 @@ class TestCreateJassGame(TestCase):
         # Clean up after each test
         self.user_1.delete()
         self.user_2.delete()
+        self.user_3.delete()
+        self.user_4.delete()
 
     def test_assign_players(self):
         """
@@ -204,12 +206,52 @@ class TestCreateJassGame(TestCase):
 
         user1_series = Series.get_series_for_player(self.user_1)
         self.assertEqual(set(user1_series), set([self.series1, self.series2]))
+        self.assertEqual(self.series1.get_users_in_series(),[self.user_1, self.user_2])
+
 
         user2_series = Series.get_series_for_player(self.user_2)
         self.assertEqual(set(user2_series), set([self.series1, self.series3]))
 
         self.assertTrue(self.series1.player_in_series(self.user_1))
         self.assertFalse(self.series2.player_in_series(self.user_2))
+
+    def test_create_game_from_series(self):
+        """
+        Creating a game from an existing series
+        """
+        series = self.series1
+        series.add_player(self.user_1, position=1)
+        series.add_player(self.user_2, position=2)
+        series.add_player(self.user_3, position=3)
+        series.add_player(self.user_4, position=4)
+
+        current_game = series.get_current_game()
+        self.assertEqual(current_game, None)
+
+        Game.create_game_from_series(series.id)
+        game = Game.objects.get(series=series)
+
+        self.assertEqual(game.series, series)
+        self.assertEqual(game.game_type, series.game_type)
+        self.assertEqual(game.number, 1)
+
+        response = Game.create_game_from_series(series.id)
+        self.assertEqual(response,  "Series game in progress")
+
+        game.completed = True
+        game.save()
+
+        Game.create_game_from_series(series.id)
+        game = Game.objects.get(series=series, number=2)
+        self.assertEqual(game.number, 2)
+
+        current_game = series.get_current_game()
+        self.assertEqual(current_game, game)
+
+
+
+
+
 
 
 

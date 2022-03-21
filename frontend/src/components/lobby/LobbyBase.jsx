@@ -9,9 +9,6 @@ import AvailableSeries from './AvailableSeries'
 
 class LobbyBase extends React.Component {
 
-//     render() {
-//         return <h1>LobbyBase World!</h1>
-//     }
 
     constructor(props) {
         super(props);
@@ -25,7 +22,7 @@ class LobbyBase extends React.Component {
     }
 
     getPlayerSeries(){
-        this.serverRequest = $.get('http://localhost:8080/player-series/?format=json', function (result) {
+        this.serverRequest = $.get('http://127.0.0.1:8000/player-series/?format=json', function (result) {
            this.setState({
             player_series_list: result,
              })
@@ -33,7 +30,7 @@ class LobbyBase extends React.Component {
     }
 
     getAvailableSeries(){
-        this.serverRequest = $.get('http://localhost:8080/available-series/?format=json', function (result) {
+        this.serverRequest = $.get('http://127.0.0.1:8000/available-series/?format=json', function (result) {
            this.setState({
             available_series_list: result
              })

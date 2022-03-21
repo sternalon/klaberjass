@@ -1,0 +1,18 @@
+{% extends "base.html" %}
+{% load render_bundle from webpack_loader %}
+
+{% load static %}
+{% block additional_head %}
+    <link rel="stylesheet" href="{% static 'css/index.css' %}"/>
+    <link rel="stylesheet" href="{% static 'css/hand.css' %}"/>
+    <link rel="stylesheet" href="{% static 'css/PlayingCard.css' %}"/>
+
+{% endblock %}
+
+{% block page_javascript %}
+    {% render_bundle 'series' %}
+{% endblock %}
+
+{% block main_content %}
+    <div data-series={{series.id}} id="series_component"></div>
+{% endblock %}

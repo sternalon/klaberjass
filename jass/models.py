@@ -31,6 +31,11 @@ class Series(models.Model):
     def get_by_id(id):
         return Series.objects.get(id=id)
 
+    def get_users_in_series(self):
+        series_players = list(SeriesPlayer.objects.filter(series=self).order_by("position"))
+        users = [series_player.user for series_player in series_players]
+        return users
+
     def player_in_series(self, user):
         ''' Returns true if player is in series'''
         return len(list(SeriesPlayer.objects.filter(user=user, series=self)))>0
@@ -53,6 +58,39 @@ class Series(models.Model):
         else:
             SeriesPlayer.objects.create(user= user, position= position, series= self)
 
+    def get_current_game(self):
+        games = Game.objects.filter(series=self).order_by('number')
+        N = len(games)
+        if len(games)>0:
+            return games[N-1]
+        else:
+            return None
+
+    def send_series_update(self):
+        """
+        Send the updated series information to the series's channel group
+        """
+        pass
+        # # imported here to avoid circular import
+        # from serializers import GameSquareSerializer, GameLogSerializer, GameSerializer
+        #
+        # squares = self.get_all_game_squares()
+        # square_serializer = GameSquareSerializer(squares, many=True)
+        #
+        # # get game log
+        # log = self.get_game_log()
+        # log_serializer = GameLogSerializer(log, many=True)
+        #
+        # game_serilizer = GameSerializer(self)
+        #
+        # message = {'game': game_serilizer.data,
+        #            'log': log_serializer.data,
+        #            'squares': square_serializer.data}
+        #
+        # game_group = 'game-{0}'.format(self.id)
+        # Group(game_group).send({'text': json.dumps(message)})
+
+
 class SeriesPlayer(models.Model):
     user = models.ForeignKey(User,on_delete=models.CASCADE)
     position = models.SmallIntegerField()
@@ -71,11 +109,26 @@ class Game(models.Model):
 
     game_type = models.CharField(choices=GAMES, default=KLABBERJASS, max_length=12)
     completed = models.BooleanField(default=False)
-    series = models.ForeignKey(Series, on_delete=models.CASCADE, null=True)
+    series = models.ForeignKey(Series,  related_name="games", on_delete=models.CASCADE, null=True)
     trumps = models.CharField(choices=SUITS, max_length=7)
+    number = models.SmallIntegerField(null=True)
     created = models.DateTimeField(auto_now_add=True)
     modified = models.DateTimeField(auto_now=True)
 
+    @staticmethod
+    def create_game_from_series(series_id):
+        series = Series.get_by_id(series_id)
+
+        if len(Game.objects.filter(series=series, completed=False))>0:
+            return "Series game in progress"
+        else:
+            game = Game.objects.create()
+            game.series = series
+            game.game_type = series.game_type
+            game.number = len(Game.objects.filter(series=series, completed=True)) + 1
+            users = series.get_users_in_series()
+            game.begin(users)
+            game.save()
 
     def begin(self, users):
         self._set_players(users)
@@ -138,7 +191,7 @@ class Game(models.Model):
 class Player(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE)
     position = models.SmallIntegerField()
-    game = models.ForeignKey(Game, on_delete=models.CASCADE)
+    game = models.ForeignKey(Game, related_name="players", on_delete=models.CASCADE)
 
     class Meta:
         unique_together = ('game', 'position', )
@@ -189,7 +242,7 @@ class CardField(models.PositiveIntegerField):
     #     return ???
 
 class Trick(models.Model):
-    game = models.ForeignKey(Game, on_delete=models.CASCADE)
+    game = models.ForeignKey(Game, related_name="tricks", on_delete=models.CASCADE)
     winner = models.ForeignKey(Player, on_delete=models.CASCADE, null = True)
     number = models.SmallIntegerField()
 
@@ -235,9 +288,9 @@ class Trick(models.Model):
 class PlayingCard(models.Model):
     card = CardField()
     played = models.BooleanField(default=False)
-    game = models.ForeignKey(Game, on_delete=models.CASCADE)
+    game = models.ForeignKey(Game, related_name="cards", on_delete=models.CASCADE)
     player = models.ForeignKey(Player, on_delete=models.CASCADE)
-    trick = models.ForeignKey(Trick, on_delete=models.SET_NULL, null=True)
+    trick = models.ForeignKey(Trick, related_name="cards", on_delete=models.SET_NULL, null=True)
     order_in_trick = models.SmallIntegerField(null=True)
 
     class Meta:
