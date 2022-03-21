@@ -15,11 +15,11 @@ class PlayingCardSerializer(serializers.ModelSerializer):
 
     def get_suit(self, obj):
         card = Card.number_to_card(obj.id)
-        return card.suit
+        return card.suit if card else None
 
     def get_number(self, obj):
         card = Card.number_to_card(obj.id)
-        return card.number
+        return card.number if card else None
 
     class Meta:
         model = PlayingCard
@@ -30,7 +30,6 @@ class PlayerSerializer(serializers.ModelSerializer):
     hand = serializers.SerializerMethodField()
 
     def get_hand(self, obj):
-
         hand = obj.get_hand()
         hand = [PlayingCardSerializer(card).data for card in hand]
         return hand
@@ -59,7 +58,7 @@ class GameSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Game
-        fields = ('id', 'number', 'game_type', 'trumps', 'completed', 'cards', 'tricks', 'players')
+        fields = ('id', 'number', 'trumps', 'completed', 'cards', 'tricks', 'players')
         depth = 2
 
 class SeriesPlayersSerializer(serializers.ModelSerializer):
@@ -73,15 +72,14 @@ class SeriesPlayersSerializer(serializers.ModelSerializer):
 
 class SeriesSerializer(serializers.ModelSerializer):
     players = SeriesPlayersSerializer(many=True)
-    games = GameSerializer(many=True)
     # TODO: Might want to only return the current game is performance is slow
-    # current_game = serializers.SerializerMethodField()
+    current_game = serializers.SerializerMethodField()
 
-    # def get_current_game(self,obj):
-    #     current_game = obj.get_current_game()
-    #     return GameSerializer(current_game).data
+    def get_current_game(self,obj):
+        return obj.id
+    
 
     class Meta:
         model = Series
-        fields = ('id', 'score1', 'score2', 'game_type', 'players', 'completed', 'created', 'games')
+        fields = ('id', 'score1', 'score2', 'players', 'completed', 'current_game')
         depth = 1
