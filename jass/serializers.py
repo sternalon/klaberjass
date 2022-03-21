@@ -76,8 +76,9 @@ class SeriesSerializer(serializers.ModelSerializer):
     current_game = serializers.SerializerMethodField()
 
     def get_current_game(self,obj):
-        return obj.id
-    
+        current_game = obj.get_current_game()
+        return current_game.id if current_game else None
+
 
     class Meta:
         model = Series
