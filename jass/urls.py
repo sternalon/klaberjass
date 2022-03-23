@@ -17,6 +17,7 @@ urlpatterns = [
 urlpatterns += [
     path('current-user/', CurrentUserView.as_view()),
     path('series-from-id/<int:series_id>/', SingleSeriesViewSet.as_view()),
+    path('game-from-id/<int:game_id>/', SingleGameViewSet.as_view()),
 ]
 
 router = DefaultRouter()

@@ -16,7 +16,7 @@ class GameBoard extends React.Component {
             current_game: null,
             current_user: props.current_user,
             hand: {
-                cards: ["2d", "2c", "2s", "2h", "2d", "2c", "2s", "2h"],
+                cards: ["Ad", "2c", "2s", "2h", "2d", "2c", "2s", "2h"],
                 layout: "spread",
                 handSize: "8",
             },
@@ -24,7 +24,6 @@ class GameBoard extends React.Component {
 
         // bind button click
         this.sendSocketMessage = this.sendSocketMessage.bind(this);
-
         this.isPlayerTurn = this.isPlayerTurn.bind(this)
 
     }
@@ -56,20 +55,12 @@ class GameBoard extends React.Component {
             }
            }
 
-     _getNamePositions() {
-        return {
-            top:{'right': '50%', 'top': "3%", 'position': 'absolute'},
-            bottom:{'bottom': '-22%', 'right': '50%', 'position': 'absolute', 'height' : '30%'},
-            left: {'bottom': '40%','right': '90%', 'position': 'absolute', 'transform': 'rotate(270deg)' },
-            right:{'bottom': '40%','left': '90%', 'position': 'absolute', 'transform': 'rotate(90deg)' }
-            }
-           }
 
     // custom methods
     getGame(){
          const game_url = 'http://127.0.0.1:8000/game-from-id/' + this.props.game_id
          this.serverRequest = $.get(game_url, function (result) {
-            console.log("AAAAAAAA", result)
+            console.log("EEEEEEE", result)
             this.setState({
                 game: result.game,
 //                 position: this.getPosition(result.game.players),
@@ -217,7 +208,7 @@ class GameBoard extends React.Component {
 
 
     render() {
-        console.log("CCCCC", this.props.socket)
+        console.log("This is the gameboard", this.props.game_id)
         return (
             <div className="row">
 
@@ -234,7 +225,7 @@ class GameBoard extends React.Component {
 
 GameBoard.propTypes = {
     current_user: PropTypes.object,
-    series_id: PropTypes.number,
+    game_id: PropTypes.number,
     socket: PropTypes.string
 }
 
