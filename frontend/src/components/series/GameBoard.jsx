@@ -16,22 +16,10 @@ class GameBoard extends React.Component {
             players: null,
             current_game: null,
             current_user: props.current_user,
-            left_hand:{
-                cards: ["1d", "2c", "3s", "2h", "2d", "2c", "2s", "2h"],
-                handSize: "8",
-            },
-            right_hand:{
-                cards: ["1d", "2c", "3s", "2h", "2d", "2c", "2s", "2h"],
-                handSize: "8",
-            },
-            top_hand:{
-                cards: ["1d", "2c", "3s", "2h", "2d", "2c", "2s", "2h"],
-                handSize: "8",
-            },
-            hand: {
-                cards: ["1d", "2c", "3s", "2h", "2d", "2c", "2s", "2h"],
-                handSize: "8",
-            },
+            left_hand:  ["1d", "2c", "3s", "2h", "2d", "2c", "2s", "2h"],
+            right_hand: ["1d", "2c", "3s", "2h", "2d", "2c", "2s", "2h"],
+            top_hand: ["1d", "2c", "3s", "2h", "2d", "2c", "2s", "2h"],
+            hand:  ["1d", "2c", "3s", "2h", "2d", "2c", "2s", "2h"],
         }
 
         // bind button click
@@ -51,11 +39,8 @@ class GameBoard extends React.Component {
     }
 
     _getCardSize() {
-//         console.log("window: ", window.innerWidth);
-//         console.log('handsize', this.state.hand.length)
-//         console.log("size: ", window.innerWidth / this.state.hand.length)
-        let cardSize = window.innerWidth / this.state.hand.cards.length;
-        return this.state.hand.layout !== "spread" || cardSize > 100 ? 100 : cardSize;
+        let cardSize = window.innerWidth / this.state.hand.length;
+        return this.state.layout !== "spread" || cardSize > 100 ? 100 : cardSize;
     }
 
     _getHandPositions() {
@@ -73,7 +58,6 @@ class GameBoard extends React.Component {
          const game_url = 'http://127.0.0.1:8000/game-from-id/' + this.props.game_id
          this.serverRequest = $.get(game_url, function (result) {
             console.log("Game Result", result)
-            console.log("QQQQQQQ", result.game.players)
             this.setState({
                 game: result.game,
 //               position: this.getPosition(result.game.players),
@@ -107,7 +91,6 @@ class GameBoard extends React.Component {
                 return (
                     {
                         cards: this.unplayedCards(players[i].hand),
-                        handSize: "8",
                     }
                 )
             }
@@ -218,21 +201,21 @@ class GameBoard extends React.Component {
 
 
             <div id='top' style={this._getHandPositions().top}>
-                    <Hand hide={true} layout={hand_layout} cards={this.state.top_hand.cards} cardSize={1.2*this._getCardSize()}/>
+                    <Hand hide={true} layout={hand_layout} cards={this.state.top_hand} cardSize={1.2*this._getCardSize()}/>
              </div>
 
 
             <div id='bottom' style={this._getHandPositions().bottom}>
-                     <Hand hide={false} layout={hand_layout} cards={this.state.hand.cards} cardSize={1.5*this._getCardSize()}/>
+                     <Hand hide={false} layout={hand_layout} cards={this.state.hand} cardSize={1.5*this._getCardSize()}/>
              </div>
 
              <div id='left' style={this._getHandPositions().left}>
-                    <Hand hide={true} layout={hand_layout} cards={this.state.left_hand.cards} cardSize={0.8*this._getCardSize()}/>
+                    <Hand hide={true} layout={hand_layout} cards={this.state.left_hand} cardSize={0.8*this._getCardSize()}/>
 
              </div>
 
               <div id='right' style={this._getHandPositions().right}>
-                    <Hand hide={true} layout={hand_layout} cards={this.state.right_hand.cards} cardSize={0.8*this._getCardSize()}/>
+                    <Hand hide={true} layout={hand_layout} cards={this.state.right_hand} cardSize={0.8*this._getCardSize()}/>
 
              </div>
 
