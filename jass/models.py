@@ -116,6 +116,10 @@ class Game(models.Model):
     modified = models.DateTimeField(auto_now=True)
 
     @staticmethod
+    def get_by_id(id):
+        return Game.objects.get(id=id)
+
+    @staticmethod
     def create_game_from_series(series_id):
         series = Series.get_by_id(series_id)
 
@@ -173,7 +177,7 @@ class Game(models.Model):
 
     def get_current_trick(self):
         open_tricks = Trick.objects.filter(game=self, winner = None).order_by('number')
-        if len(open_tricks)>0:
+        if len(open_tricks) > 0:
             return open_tricks[0]
         else:
             return None

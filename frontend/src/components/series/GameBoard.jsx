@@ -9,22 +9,21 @@ class GameBoard extends React.Component {
     // lifecycle methods
     constructor(props) {
         super(props)
+        this.hand_layout= "spread"
         this.state = {
             game: null,
             position: null,
             players: null,
             current_game: null,
             current_user: props.current_user,
-            hand: {
-                cards: ["2d", "2c", "2s", "2h", "2d", "2c", "2s", "2h"],
-                layout: "spread",
-                handSize: "8",
-            },
+            left_hand:  ["1d", "2c", "3s", "2h", "2d", "2c", "2s", "2h"],
+            right_hand: ["1d", "2c", "3s", "2h", "2d", "2c", "2s", "2h"],
+            top_hand: ["1d", "2c", "3s", "2h", "2d", "2c", "2s", "2h"],
+            hand:  ["1d", "2c", "3s", "2h", "2d", "2c", "2s", "2h"],
         }
 
         // bind button click
         this.sendSocketMessage = this.sendSocketMessage.bind(this);
-
         this.isPlayerTurn = this.isPlayerTurn.bind(this)
 
     }
@@ -40,11 +39,8 @@ class GameBoard extends React.Component {
     }
 
     _getCardSize() {
-//         console.log("window: ", window.innerWidth);
-//         console.log('handsize', this.state.hand.length)
-//         console.log("size: ", window.innerWidth / this.state.hand.length)
-        let cardSize = window.innerWidth / this.state.hand.cards.length;
-        return this.state.hand.layout !== "spread" || cardSize > 100 ? 100 : cardSize;
+        let cardSize = window.innerWidth / this.state.hand.length;
+        return this.state.layout !== "spread" || cardSize > 100 ? 100 : cardSize;
     }
 
     _getHandPositions() {
@@ -56,26 +52,51 @@ class GameBoard extends React.Component {
             }
            }
 
-     _getNamePositions() {
-        return {
-            top:{'right': '50%', 'top': "3%", 'position': 'absolute'},
-            bottom:{'bottom': '-22%', 'right': '50%', 'position': 'absolute', 'height' : '30%'},
-            left: {'bottom': '40%','right': '90%', 'position': 'absolute', 'transform': 'rotate(270deg)' },
-            right:{'bottom': '40%','left': '90%', 'position': 'absolute', 'transform': 'rotate(90deg)' }
-            }
-           }
 
     // custom methods
     getGame(){
          const game_url = 'http://127.0.0.1:8000/game-from-id/' + this.props.game_id
          this.serverRequest = $.get(game_url, function (result) {
-            console.log("AAAAAAAA", result)
+            console.log("Game Result", result)
             this.setState({
                 game: result.game,
-//                 position: this.getPosition(result.game.players),
-//                 players: result.game.players,
+//               position: this.getPosition(result.game.players),
+                 players: result.game.players,
+                 hand: this.currentPlayerHand(result.game.players)
             })
         }.bind(this))
+    }
+
+    convertCardToString(card){
+        var suitMap = { 'spade': "s", 'heart': "h", 'diamond': "d", "club":"c" };
+        var numberMap = { 'ace': "1", 'two': "2", 'three': "3", "four":"4", "five":"5", "six":"6", "seven":"7", "eight":"8", "nine":"9", "ten":"10", "jack":"j", "queen":"q", "king":"k" };
+        return numberMap[card.number] + suitMap[card.suit]
+    }
+
+    unplayedCards(cards){
+        var unplayed = []
+        for (let i = 0; i < cards.length; i++) {
+            if (cards[i].played == false){
+                unplayed.push(this.convertCardToString(cards[i]))
+            }
+        }
+        return unplayed
+    }
+
+    currentPlayerHand(players){
+    if (players){
+        for (let i = 0; i < players.length; i++) {
+            if (players[i].user == this.state.current_user.id){
+                   console.log("AAAAA", players[i].hand)
+                return (
+                    {
+                        cards: this.unplayedCards(players[i].hand),
+                    }
+                )
+            }
+        }
+        }else{
+        return null}
     }
 
 //      getPosition(players){
@@ -173,27 +194,28 @@ class GameBoard extends React.Component {
 
 
     renderDeck() {
+        const hand_layout = "spread"
 
       return (
           <div>
 
 
             <div id='top' style={this._getHandPositions().top}>
-                    <Hand hide={true} layout={this.state.hand.layout} cards={this.state.hand.cards} cardSize={1.2*this._getCardSize()}/>
+                    <Hand hide={true} layout={hand_layout} cards={this.state.top_hand} cardSize={1.2*this._getCardSize()}/>
              </div>
 
 
             <div id='bottom' style={this._getHandPositions().bottom}>
-                     <Hand hide={false} layout={this.state.hand.layout} cards={this.state.hand.cards} cardSize={1.5*this._getCardSize()}/>
+                     <Hand hide={false} layout={hand_layout} cards={this.state.hand} cardSize={1.5*this._getCardSize()}/>
              </div>
 
              <div id='left' style={this._getHandPositions().left}>
-                    <Hand hide={true} layout={this.state.hand.layout} cards={this.state.hand.cards} cardSize={0.8*this._getCardSize()}/>
+                    <Hand hide={true} layout={hand_layout} cards={this.state.left_hand} cardSize={0.8*this._getCardSize()}/>
 
              </div>
 
               <div id='right' style={this._getHandPositions().right}>
-                    <Hand hide={true} layout={this.state.hand.layout} cards={this.state.hand.cards} cardSize={0.8*this._getCardSize()}/>
+                    <Hand hide={true} layout={hand_layout} cards={this.state.right_hand} cardSize={0.8*this._getCardSize()}/>
 
              </div>
 
@@ -217,7 +239,7 @@ class GameBoard extends React.Component {
 
 
     render() {
-        console.log("CCCCC", this.props.socket)
+        console.log("This is the gameboard", this.props.game_id)
         return (
             <div className="row">
 
@@ -234,7 +256,7 @@ class GameBoard extends React.Component {
 
 GameBoard.propTypes = {
     current_user: PropTypes.object,
-    series_id: PropTypes.number,
+    game_id: PropTypes.number,
     socket: PropTypes.string
 }
 

@@ -14,12 +14,10 @@ class PlayingCardSerializer(serializers.ModelSerializer):
     number = serializers.SerializerMethodField()
 
     def get_suit(self, obj):
-        card = Card.number_to_card(obj.id)
-        return card.suit if card else None
+        return obj.card.suit if obj.card else None
 
     def get_number(self, obj):
-        card = Card.number_to_card(obj.id)
-        return card.number if card else None
+        return obj.card.number if obj.card else None
 
     class Meta:
         model = PlayingCard
@@ -45,20 +43,21 @@ class TrickSerializer(serializers.ModelSerializer):
         fields = ('id', 'game', 'winner', 'number', 'cards')
 
 class GameSerializer(serializers.ModelSerializer):
-    cards = PlayingCardSerializer(many=True)
-    tricks = TrickSerializer(many=True)
+    # cards = PlayingCardSerializer(many=True)
+    current_trick = serializers.SerializerMethodField()
+    # tricks = TrickSerializer(many=True)
     players = PlayerSerializer(many= True)
 
-    # TODO: Might want to only return the currrent trick is performance is slow
-    # current_trick = serializers.SerializerMethodField()
+    # TODO: Might want to only return the current trick is performance is slow
 
-    # def get_current_trick(self,obj):
-    #     current_trick = obj.get_current_trick()
-    #     return TrickSerializer(current_trick).data
+    def get_current_trick(self,obj):
+        current_trick = obj.get_current_trick()
+        return current_trick.id if current_trick else None
 
     class Meta:
         model = Game
-        fields = ('id', 'number', 'trumps', 'completed', 'cards', 'tricks', 'players')
+        # fields = ('id', 'number', 'trumps', 'completed', 'cards', 'current_trick', 'players')
+        fields = ('id', 'number', 'trumps', 'completed', 'current_trick','players')
         depth = 2
 
 class SeriesPlayersSerializer(serializers.ModelSerializer):
@@ -72,7 +71,6 @@ class SeriesPlayersSerializer(serializers.ModelSerializer):
 
 class SeriesSerializer(serializers.ModelSerializer):
     players = SeriesPlayersSerializer(many=True)
-    # TODO: Might want to only return the current game is performance is slow
     current_game = serializers.SerializerMethodField()
 
     def get_current_game(self,obj):
