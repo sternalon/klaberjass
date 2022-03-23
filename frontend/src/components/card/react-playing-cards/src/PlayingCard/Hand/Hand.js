@@ -21,7 +21,7 @@ class Hand extends Component {
 
     }
     componentWillReceiveProps(props) {
-        console.log('got some props: ', props)
+//        console.log('got some props: ', props)
 
         this.setState({
             cards : props.cards,
@@ -64,14 +64,14 @@ class Hand extends Component {
         }
     }
     fanStyle(num) {
-        console.log("handlenght", this.handLength);
-        console.log("num", num)
+//        console.log("handlenght", this.handLength);
+//        console.log("num", num)
         let overHalf = num > (this.handLength - 1) / 2;
         if (false && process.env.NODE_ENV !== "production") {
-            console.log('degs', this.degs);
-            console.log('over', this.over);
-            console.log('down', (this.overHalf ? -this.down : this.down));
-            console.log('num: ', num)
+//            console.log('degs', this.degs);
+//            console.log('over', this.over);
+//            console.log('down', (this.overHalf ? -this.down : this.down));
+//            console.log('num: ', num)
         }
         if (num > 0) {
             this.degs -= this.deg / (this.handLength - 1);
@@ -94,7 +94,7 @@ class Hand extends Component {
         }
     }
     isCardDead(id) {
-        console.log('card is dead: ', this.deadCards[id] ? this.deadCards[id].dead : false)
+//        console.log('card is dead: ', this.deadCards[id] ? this.deadCards[id].dead : false)
         return this.deadCards[id] ? this.deadCards[id].dead : false;
     }
     removeCard(id, style) {
@@ -103,7 +103,7 @@ class Hand extends Component {
                 dead : true,
                 style : style //should it keep track of its own style?
             };
-            console.log(this.deadCards);
+//            console.log(this.deadCards);
             if(this.handLength) {
                 this.handLength--;
             }
@@ -124,14 +124,14 @@ class Hand extends Component {
         //this.props.onClick({card: key, hand : this.props.handId});
     }
     onDragStop(key) {
-        console.log(this);
+//        console.log(this);
         // console.log('style: ', )
-        console.log('reviving: ', key);
+//        console.log('reviving: ', key);
 
         // this.refs[key].state.draggableDivStyle = {"transitionDuration": "0.25s"}
         let cardToSpliceInto = this.state.cards[this.indexToInsertInto(key) + 1];
         this.refs[key].state.position = {x : this.refs[key].getBindingClientRect().x, y : this.refs[key].getBindingClientRect().y}
-        console.log('card to splice into: ', cardToSpliceInto);
+//        console.log('card to splice into: ', cardToSpliceInto);
         this.state.cards.splice(this.state.cards.indexOf(key), 1);
         this.state.cards.splice(this.indexToInsertInto(key), 0, key);
 
@@ -165,7 +165,7 @@ class Hand extends Component {
             if(this.state.cards[i] === key) {
                 continue;
             }
-            console.log('xCard ', this.state.cards[i], ' : ', this.refs[key].getBindingClientRect().x)
+//            console.log('xCard ', this.state.cards[i], ' : ', this.refs[key].getBindingClientRect().x)
             if(xPositionOfKey < this.refs[this.state.cards[i]].getBindingClientRect().x) {
                 return indexToInsertInto;
             } else {
@@ -207,7 +207,7 @@ class Hand extends Component {
     // }
     render() {
         let index = 0;
-console.log('state: ', this.state);
+//console.log('state: ', this.state);
         if(this.state.layout === 'fan'){
             console.log('reseting fanning');
             this.resetFanning();
@@ -226,8 +226,8 @@ console.log('state: ', this.state);
           style={{ 'height': this.state.layout === 'stack' ? this.state.cardSize : this.state.cardSize * 2}} >
           {
               this.state.cards.map((card) => {
-                  console.log('id: ', card);
-                  console.log('refs', this.refs);
+//                  console.log('id: ', card);
+//                  console.log('refs', this.refs);
                   return (
                       <PlayingCard
                           onDragStart={this.onDragStart.bind(this)}

@@ -9,15 +9,27 @@ class GameBoard extends React.Component {
     // lifecycle methods
     constructor(props) {
         super(props)
+        this.hand_layout= "spread"
         this.state = {
             game: null,
             position: null,
             players: null,
             current_game: null,
             current_user: props.current_user,
+            left_hand:{
+                cards: ["1d", "2c", "3s", "2h", "2d", "2c", "2s", "2h"],
+                handSize: "8",
+            },
+            right_hand:{
+                cards: ["1d", "2c", "3s", "2h", "2d", "2c", "2s", "2h"],
+                handSize: "8",
+            },
+            top_hand:{
+                cards: ["1d", "2c", "3s", "2h", "2d", "2c", "2s", "2h"],
+                handSize: "8",
+            },
             hand: {
-                cards: ["Ad", "2c", "2s", "2h", "2d", "2c", "2s", "2h"],
-                layout: "spread",
+                cards: ["1d", "2c", "3s", "2h", "2d", "2c", "2s", "2h"],
                 handSize: "8",
             },
         }
@@ -60,13 +72,48 @@ class GameBoard extends React.Component {
     getGame(){
          const game_url = 'http://127.0.0.1:8000/game-from-id/' + this.props.game_id
          this.serverRequest = $.get(game_url, function (result) {
-            console.log("EEEEEEE", result)
+            console.log("Game Result", result)
+            console.log("QQQQQQQ", result.game.players)
             this.setState({
                 game: result.game,
-//                 position: this.getPosition(result.game.players),
-//                 players: result.game.players,
+//               position: this.getPosition(result.game.players),
+                 players: result.game.players,
+                 hand: this.currentPlayerHand(result.game.players)
             })
         }.bind(this))
+    }
+
+    convertCardToString(card){
+        var suitMap = { 'spade': "s", 'heart': "h", 'diamond': "d", "club":"c" };
+        var numberMap = { 'ace': "1", 'two': "2", 'three': "3", "four":"4", "five":"5", "six":"6", "seven":"7", "eight":"8", "nine":"9", "ten":"10", "jack":"j", "queen":"q", "king":"k" };
+        return numberMap[card.number] + suitMap[card.suit]
+    }
+
+    unplayedCards(cards){
+        var unplayed = []
+        for (let i = 0; i < cards.length; i++) {
+            if (cards[i].played == false){
+                unplayed.push(this.convertCardToString(cards[i]))
+            }
+        }
+        return unplayed
+    }
+
+    currentPlayerHand(players){
+    if (players){
+        for (let i = 0; i < players.length; i++) {
+            if (players[i].user == this.state.current_user.id){
+                   console.log("AAAAA", players[i].hand)
+                return (
+                    {
+                        cards: this.unplayedCards(players[i].hand),
+                        handSize: "8",
+                    }
+                )
+            }
+        }
+        }else{
+        return null}
     }
 
 //      getPosition(players){
@@ -164,27 +211,28 @@ class GameBoard extends React.Component {
 
 
     renderDeck() {
+        const hand_layout = "spread"
 
       return (
           <div>
 
 
             <div id='top' style={this._getHandPositions().top}>
-                    <Hand hide={true} layout={this.state.hand.layout} cards={this.state.hand.cards} cardSize={1.2*this._getCardSize()}/>
+                    <Hand hide={true} layout={hand_layout} cards={this.state.top_hand.cards} cardSize={1.2*this._getCardSize()}/>
              </div>
 
 
             <div id='bottom' style={this._getHandPositions().bottom}>
-                     <Hand hide={false} layout={this.state.hand.layout} cards={this.state.hand.cards} cardSize={1.5*this._getCardSize()}/>
+                     <Hand hide={false} layout={hand_layout} cards={this.state.hand.cards} cardSize={1.5*this._getCardSize()}/>
              </div>
 
              <div id='left' style={this._getHandPositions().left}>
-                    <Hand hide={true} layout={this.state.hand.layout} cards={this.state.hand.cards} cardSize={0.8*this._getCardSize()}/>
+                    <Hand hide={true} layout={hand_layout} cards={this.state.left_hand.cards} cardSize={0.8*this._getCardSize()}/>
 
              </div>
 
               <div id='right' style={this._getHandPositions().right}>
-                    <Hand hide={true} layout={this.state.hand.layout} cards={this.state.hand.cards} cardSize={0.8*this._getCardSize()}/>
+                    <Hand hide={true} layout={hand_layout} cards={this.state.right_hand.cards} cardSize={0.8*this._getCardSize()}/>
 
              </div>
 
