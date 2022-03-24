@@ -87,12 +87,11 @@ class GameBoard extends React.Component {
     if (players){
         for (let i = 0; i < players.length; i++) {
             if (players[i].user == this.state.current_user.id){
-                   console.log("AAAAA", players[i].hand)
+                console.log("AAAAA", players[i].hand)
                 return (
-                    {
-                        cards: this.unplayedCards(players[i].hand),
-                    }
+                        this.unplayedCards(players[i].hand)
                 )
+
             }
         }
         }else{
