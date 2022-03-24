@@ -3,6 +3,7 @@ import PropTypes from 'prop-types';
 import $ from 'jquery'
 import Websocket from 'react-websocket'
 import Hand from "./react-playing-cards/src/PlayingCard/Hand/Hand";
+import Trick from './Trick'
 
 
 class GameBoard extends React.Component {
@@ -189,7 +190,14 @@ class GameBoard extends React.Component {
         return board
     }
 
-
+    renderTrick() {
+      return (
+         <div >
+            <Trick current_user={this.props.current_user} trick_id={5} socket = {this.props.socket}
+                                 sendSocketMessage={this.sendSocketMessage} />
+         </div>
+      )
+  }
 
 
     renderDeck() {
@@ -240,10 +248,12 @@ class GameBoard extends React.Component {
     render() {
         console.log("This is the gameboard", this.props.game_id)
         return (
-            <div className="row">
+            <div >
 
 
                    {this.renderDeck()}
+
+                   {this.renderTrick()}
 
 
             <Websocket ref="socket" url={this.props.socket}
