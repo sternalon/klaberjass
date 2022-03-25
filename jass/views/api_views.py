@@ -71,3 +71,15 @@ class SingleGameViewSet(APIView):
         game_serializer = GameSerializer(game)
         return_data = {'game': game_serializer.data}
         return Response(return_data)
+
+class SingleTrickViewSet(APIView):
+    """
+    Get all data for a game: Game Details, Current Game
+    """
+
+    def get(self, request, **kwargs):
+        trick = Trick.get_by_id(kwargs['trick_id'])
+        trick_serializer = TrickSerializer(trick)
+        return_data = {'trick': trick_serializer.data}
+        return Response(return_data)
+

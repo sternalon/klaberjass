@@ -250,6 +250,10 @@ class Trick(models.Model):
     winner = models.ForeignKey(Player, on_delete=models.CASCADE, null = True)
     number = models.SmallIntegerField()
 
+    @staticmethod
+    def get_by_id(id):
+        return Trick.objects.get(id=id)
+
     def to_play(self):
         lead_position = self.lead().position
         num_cards_in_trick = len(self.get_playing_cards())

@@ -10,12 +10,10 @@ class GameBoard extends React.Component {
     // lifecycle methods
     constructor(props) {
         super(props)
-        this.hand_layout= "spread"
         this.state = {
             game: null,
             position: null,
             players: null,
-            current_game: null,
             current_user: props.current_user,
             left_hand:  ["1d", "2c", "3s", "2h", "2d", "2c", "2s", "2h"],
             right_hand: ["1d", "2c", "3s", "2h", "2d", "2c", "2s", "2h"],
@@ -63,7 +61,8 @@ class GameBoard extends React.Component {
                 game: result.game,
 //               position: this.getPosition(result.game.players),
                  players: result.game.players,
-                 hand: this.currentPlayerHand(result.game.players)
+                 hand: this.currentPlayerHand(result.game.players),
+                 trick_id : result.game.current_trick
             })
         }.bind(this))
     }
@@ -191,12 +190,15 @@ class GameBoard extends React.Component {
     }
 
     renderTrick() {
-      return (
-         <div >
-            <Trick current_user={this.props.current_user} trick_id={5} socket = {this.props.socket}
-                                 sendSocketMessage={this.sendSocketMessage} />
-         </div>
-      )
+    console.log("GGGGGGG", this.state.trick_id, this.state.trick_id != null)
+        if (this.state.trick_id != null){
+          return (
+             <div >
+                <Trick current_user={this.props.current_user} trick_id={this.state.trick_id} socket = {this.props.socket}
+                                     sendSocketMessage={this.sendSocketMessage} />
+             </div>
+          )
+       }
   }
 
 
