@@ -8,7 +8,7 @@ module.exports = {
           lobby: './src/components/lobby/index.jsx',
           hello: './src/components/hello/index.js',
           series: './src/components/series/index.jsx',
-          card: './src/components/card/index.jsx',
+//          card: './src/components/card/index.jsx',
     },
     output: {
       path: path.resolve('./static/bundles/'),
