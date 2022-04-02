@@ -14,7 +14,7 @@ class SeriesBoard extends React.Component {
         this.state = {
             series: null,
             position: null,
-            players: null,
+            users: null,
             current_game: null,
             current_user: props.current_user,
             hand: {
@@ -60,15 +60,15 @@ class SeriesBoard extends React.Component {
             this.setState({
                 series: result.series,
                 position: this.getPosition(result.series.players),
-                players: result.series.players,
+                users: result.series.players,
             })
         }.bind(this))
     }
 
-     getPosition(players){
-        for (let i = 0; i < players.length; i++) {
-            if (players[i].username == this.state.current_user.username){
-                return players[i].position
+     getPosition(users){
+        for (let i = 0; i < users.length; i++) {
+            if (users[i].username == this.state.current_user.username){
+                return users[i].position
             }
         }
     }
@@ -93,8 +93,8 @@ class SeriesBoard extends React.Component {
 
     getPlayerName(position){
         var position_mod_4 = position % 4
-        if (this.state.players[position_mod_4]){
-            return this.state.players[position_mod_4].username
+        if (this.state.users[position_mod_4]){
+            return this.state.users[position_mod_4].username
            }else{
                return null
            }
@@ -103,7 +103,7 @@ class SeriesBoard extends React.Component {
 
     renderNames() {
         var player_position = this.state.position -1
-        if (this.state.players) {
+        if (this.state.users) {
               return (
                   <div>
 
@@ -155,8 +155,8 @@ class SeriesBoard extends React.Component {
     }
 
     renderDealOrLoading() {
-        if (this.state.players){
-            if (this.state.players.length<4){
+        if (this.state.users){
+            if (this.state.users.length<4){
                 return this.renderRefreshButton()
             }else{
                 if (this.state.series != null){

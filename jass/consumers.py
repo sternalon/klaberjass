@@ -2,11 +2,12 @@ import re
 import logging
 # from channels import Group
 # from channels.sessions import channel_session
-from .models import Series, Game
+from .models import Series, Game, PlayingCard, Trick
 # from channels.auth import channel_session_user
 from channels.generic.websocket import JsonWebsocketConsumer
 from channels import layers
 from asgiref.sync import async_to_sync
+from .utils import Card
 log = logging.getLogger(__name__)
 
 
@@ -86,16 +87,33 @@ class SeriesConsumer(JsonWebsocketConsumer):
         """
         channel_session_user = True
         http_user = True
-        series_id = self.scope["url_route"]["kwargs"]["series_id"]
+
 
         # get the action that's coming in
         action = content['action']
         if action == 'create_game':
+            series_id = self.scope["url_route"]["kwargs"]["series_id"]
             # create the next game in the series
             Game.create_game_from_series(series_id)
             series = Series.get_by_id(series_id)
             # series.send_series_update()
             print("BBBBB", series.id)
+
+        if action == 'play_card':
+            game_id = content['game_id']
+            suit = content['suit']
+            number = content['number']
+            trick_id = content['trick_id']
+            card = Card(number=number , suit = suit)
+
+            trick = Trick.get_by_id(trick_id)
+
+
+            playing_card = PlayingCard.get_by_game_and_card(game_id, card.card_number)
+            print("YYYYYY", playing_card)
+            valid, message = playing_card.play(trick)
+            print("ZZZZZ", valid, message)
+            # series.send_series_update()
 
     # def receive(self, content, **kwargs):
     #     """
@@ -128,4 +146,5 @@ class SeriesConsumer(JsonWebsocketConsumer):
     #     """
     #     Perform things on connection close
     #     """
+
 

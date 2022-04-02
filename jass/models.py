@@ -304,6 +304,10 @@ class PlayingCard(models.Model):
     class Meta:
         unique_together = ('card', 'game',)
 
+    @staticmethod
+    def get_by_game_and_card(game, card):
+        return PlayingCard.objects.get(game=game, card=card)
+
 
     def play(self, trick):
         valid, message = self.valid_play(trick)

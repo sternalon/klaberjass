@@ -12,6 +12,7 @@ class UserSerializer(serializers.ModelSerializer):
 class PlayingCardSerializer(serializers.ModelSerializer):
     suit = serializers.SerializerMethodField()
     number = serializers.SerializerMethodField()
+    user = serializers.SerializerMethodField()
 
     def get_suit(self, obj):
         return obj.card.suit if obj.card else None
@@ -19,9 +20,12 @@ class PlayingCardSerializer(serializers.ModelSerializer):
     def get_number(self, obj):
         return obj.card.number if obj.card else None
 
+    def get_user(self, obj):
+        return obj.player.user.id if obj.player else None
+
     class Meta:
         model = PlayingCard
-        fields = ('id', 'suit', 'number', 'player', 'game', 'trick', 'order_in_trick', 'played')
+        fields = ('id', 'suit', 'number', 'player', 'game', 'trick', 'order_in_trick', 'played', 'user')
 
 
 class PlayerSerializer(serializers.ModelSerializer):
@@ -38,6 +42,13 @@ class PlayerSerializer(serializers.ModelSerializer):
 
 
 class TrickSerializer(serializers.ModelSerializer):
+    cards = PlayingCardSerializer(many=True)
+    # lead = serializers.SerializerMethodField()
+
+    # def get_lead(self, obj):
+    #     lead = obj.lead()
+    #     return PlayerSerializer(lead).data if lead else None
+
     class Meta:
         model = Trick
         fields = ('id', 'game', 'winner', 'number', 'cards')
@@ -52,7 +63,8 @@ class GameSerializer(serializers.ModelSerializer):
 
     def get_current_trick(self,obj):
         current_trick = obj.get_current_trick()
-        return current_trick.id if current_trick else None
+        return TrickSerializer(current_trick).data
+        # return current_trick.id if current_trick else None
 
     class Meta:
         model = Game
