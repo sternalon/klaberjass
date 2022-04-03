@@ -182,6 +182,13 @@ class Game(models.Model):
         else:
             return None
 
+    def get_previous_trick(self):
+        open_tricks = Trick.objects.filter(game=self).exclude(winner=None).order_by('-number')
+        if len(open_tricks) > 0:
+            return open_tricks[0]
+        else:
+            return None
+
     def get_rules(self):
         config = GameConfig(self.game_type)
         return config.rules
@@ -202,6 +209,10 @@ class Player(models.Model):
 
     def get_hand(self):
         return list(PlayingCard.objects.filter(game=self.game, player=self))
+
+    def get_username(self):
+        return self.user.username
+
 
     def get_unplayed_hand(self):
         return list(PlayingCard.objects.filter(game=self.game, player=self, played=False))

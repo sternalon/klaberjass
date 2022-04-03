@@ -76,7 +76,6 @@ class GameBoard extends React.Component {
          this.serverRequest = $.get(game_url, function (result) {
             console.log("Game Result", result)
             var players = this.orderPlayers(result.game.players)
-            console.log("Ordered_players", players)
             this.setState({
                 game: result.game,
                 current_player: players[0],
@@ -151,7 +150,6 @@ class GameBoard extends React.Component {
                 }
             }
         }
-        console.log("ordered_trick", ordered_trick)
         return ordered_trick
 
 
@@ -286,7 +284,6 @@ class GameBoard extends React.Component {
     }
 
     renderTrick() {
-    console.log("GGGGGGG", this.state.current_trick)
     var current_trick =  this.state.current_trick
 
         if (this.state.current_trick != null){
@@ -368,7 +365,6 @@ class GameBoard extends React.Component {
 
 
     render() {
-        console.log("This is the gameboard", this.props.game_id)
         return (
             <div >
 

@@ -56,7 +56,6 @@ class SeriesBoard extends React.Component {
     getSeries(){
          const series_url = 'http://127.0.0.1:8000/series-from-id/' + this.props.series_id
          this.serverRequest = $.get(series_url, function (result) {
-            console.log("Result from getSeries API: ", result)
             this.setState({
                 series: result.series,
                 position: this.getPosition(result.series.players),
@@ -173,7 +172,6 @@ class SeriesBoard extends React.Component {
 
 
     render() {
-        console.log("You are now in the SeriesBoard in series", this.props.series_id)
         return (
             <div className="row">
 

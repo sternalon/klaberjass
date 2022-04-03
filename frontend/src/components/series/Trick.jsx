@@ -101,10 +101,6 @@ this.state = {
 
 
   render() {
-    console.log("Trick Bottom: ", this.props.bottom_card)
-    console.log("Trick Left: ", this.props.left_card)
-    console.log("Trick Top: ", this.props.top_card)
-    console.log("Trick Right: ", this.props.right_card)
     return (
          <div>
             {this.renderBottomCard()}
