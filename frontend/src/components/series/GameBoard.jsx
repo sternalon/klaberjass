@@ -15,10 +15,10 @@ class GameBoard extends React.Component {
             position: null,
             players: null,
             current_user: props.current_user,
-            left_hand:  ["1d", "2c", "3s", "2h", "2d", "2c", "2s", "2h"],
-            right_hand: ["1d", "2c", "3s", "2h", "2d", "2c", "2s", "2h"],
-            top_hand: ["1d", "2c", "3s", "2h", "2d", "2c", "2s", "2h"],
-            hand:  ["1d", "2c", "3s", "2h", "2d", "2c", "2s", "2h"],
+            left_hand:  null,
+            right_hand: null,
+            top_hand: null,
+            hand:  null,
         }
 
         // bind button click
@@ -55,8 +55,9 @@ class GameBoard extends React.Component {
     }
 
     _getCardSize() {
-        let cardSize = window.innerWidth / this.state.hand.length;
-        return this.state.layout !== "spread" || cardSize > 100 ? 100 : cardSize;
+        return 100
+//         let cardSize = window.innerWidth / this.state.hand.length;
+//         return this.state.layout !== "spread" || cardSize > 100 ? 100 : cardSize;
     }
 
     _getHandPositions() {
@@ -84,6 +85,9 @@ class GameBoard extends React.Component {
 //              position: this.getPosition(result.game.players),
 //              hand: this.currentPlayerHand(result.game.players),
                 hand: this.unplayedCards(players[0].hand),
+                left_hand: this.unplayedCards(players[1].hand),
+                right_hand: this.unplayedCards(players[2].hand),
+                top_hand: this.unplayedCards(players[3].hand),
                 current_trick : this.orderCardsInTrick(result.game.current_trick.cards, players)
             })
         }.bind(this))
@@ -294,33 +298,56 @@ class GameBoard extends React.Component {
        }
   }
 
+    renderLeftHand(){
+        if (this.state.left_hand){
+            return(
+                <div id='left' style={this._getHandPositions().left}>
+                        <Hand hide={true} layout={"spread"} onDoubleClick={this.doNothingonDoubleClick.bind(this)} cards={this.state.left_hand} cardSize={0.8*this._getCardSize()}/>
 
-    renderDeck() {
-        const hand_layout = "spread"
+                 </div>
+            )
+        }
+    }
 
+    renderRightHand(){
+        if (this.state.right_hand){
+            return(
+                <div id='right' style={this._getHandPositions().right}>
+                    <Hand hide={true} layout={"spread"} onDoubleClick={this.doNothingonDoubleClick.bind(this)} cards={this.state.right_hand} cardSize={0.8*this._getCardSize()}/>
+
+                </div>
+            )
+        }
+    }
+
+    renderTopHand(){
+        if (this.state.top_hand){
+            return(
+                 <div id='top' style={this._getHandPositions().top}>
+                    <Hand hide={true} layout={"spread"} onDoubleClick={this.doNothingonDoubleClick.bind(this)} cards={this.state.top_hand} cardSize={1.2*this._getCardSize()}/>
+                </div>
+            )
+        }
+    }
+
+    renderBottomHand(){
+        if (this.state.hand){
+            return(
+                 <div id='bottom' style={this._getHandPositions().bottom}>
+                     <Hand hide={false} onDoubleClick={this.onDoubleClick.bind(this)} layout={"spread"} cards={this.state.hand} cardSize={1.5*this._getCardSize()}/>
+             </div>
+            )
+        }
+    }
+
+
+    renderHands() {
       return (
           <div>
-
-
-            <div id='top' style={this._getHandPositions().top}>
-                    <Hand hide={true} layout={hand_layout} onDoubleClick={this.doNothingonDoubleClick.bind(this)} cards={this.state.top_hand} cardSize={1.2*this._getCardSize()}/>
-             </div>
-
-
-            <div id='bottom' style={this._getHandPositions().bottom}>
-                     <Hand hide={false} onDoubleClick={this.onDoubleClick.bind(this)} layout={hand_layout} cards={this.state.hand} cardSize={1.5*this._getCardSize()}/>
-             </div>
-
-             <div id='left' style={this._getHandPositions().left}>
-                    <Hand hide={true} layout={hand_layout} onDoubleClick={this.doNothingonDoubleClick.bind(this)} cards={this.state.left_hand} cardSize={0.8*this._getCardSize()}/>
-
-             </div>
-
-              <div id='right' style={this._getHandPositions().right}>
-                    <Hand hide={true} layout={hand_layout} onDoubleClick={this.doNothingonDoubleClick.bind(this)} cards={this.state.right_hand} cardSize={0.8*this._getCardSize()}/>
-
-             </div>
-
+             {this.renderLeftHand()}
+             {this.renderRightHand()}
+             {this.renderTopHand()}
+             {this.renderBottomHand()}
           </div>
       );
   }
@@ -346,7 +373,7 @@ class GameBoard extends React.Component {
             <div >
 
 
-                   {this.renderDeck()}
+                   {this.renderHands()}
 
                    {this.renderTrick()}
 
