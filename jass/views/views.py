@@ -10,6 +10,7 @@ from django.contrib.auth import get_user
 from django.contrib import messages
 
 from jass.models import User, Series
+from jass import signals
 
 
 class HomeView(TemplateView):
@@ -79,6 +80,7 @@ class SeriesView(TemplateView):
         #Check if series is not yet full, and adds player to series
         if not self.series.is_full() and not self.series.completed:
             self.series.add_next_user(user)
+            signals.send_available_series_update()
             return super(SeriesView, self).dispatch(request, *args, **kwargs)
         else:
             messages.add_message(request, messages.ERROR, 'Sorry, the selected series is not available.')

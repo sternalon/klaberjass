@@ -66,29 +66,6 @@ class Series(models.Model):
         else:
             return None
 
-    def send_series_update(self):
-        """
-        Send the updated series information to the series's channel group
-        """
-        pass
-        # # imported here to avoid circular import
-        # from serializers import GameSquareSerializer, GameLogSerializer, GameSerializer
-        #
-        # squares = self.get_all_game_squares()
-        # square_serializer = GameSquareSerializer(squares, many=True)
-        #
-        # # get game log
-        # log = self.get_game_log()
-        # log_serializer = GameLogSerializer(log, many=True)
-        #
-        # game_serilizer = GameSerializer(self)
-        #
-        # message = {'game': game_serilizer.data,
-        #            'log': log_serializer.data,
-        #            'squares': square_serializer.data}
-        #
-        # game_group = 'game-{0}'.format(self.id)
-        # Group(game_group).send({'text': json.dumps(message)})
 
 
 class SeriesPlayer(models.Model):
