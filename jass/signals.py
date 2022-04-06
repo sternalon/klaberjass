@@ -17,10 +17,18 @@ def send_available_series_update():
     Send the updated series information to the lobby channel group
     """
     avail_series_list = Series.get_available_series()
-    avail_serializer = SeriesSerializer(avail_series_list, many=True)
+    avail_serialized = SeriesSerializer(avail_series_list, many=True)
 
     layer = get_channel_layer()
-    async_to_sync(layer.group_send)('lobby', {"type": "lobby.send", 'text': json.dumps(avail_serializer.data)})
+    async_to_sync(layer.group_send)('lobby', {"type": "lobby.send", 'text': json.dumps(avail_serialized.data)})
+
+
+def send_game_update(game):
+    game_serialized = GameSerializer(game)
+    series_channel = 'series-{0}'.format(game.series.id)
+
+    layer = get_channel_layer()
+    async_to_sync(layer.group_send)(series_channel, {"type": "series.send", 'text': json.dumps(game_serialized.data)})
 
 
 @receiver(post_save, sender=Series)
@@ -43,3 +51,31 @@ def new_series_handler(**kwargs):
     # if new
     if kwargs['created']:
         send_available_series_update()
+
+
+@receiver(post_save, sender=Game)
+def new_series_handler(sender, instance, **kwargs):
+    """
+    When a game is updated, update is sent to the 'series' group.
+    """
+    game = instance
+    send_game_update(game)
+
+
+@receiver(post_save, sender=PlayingCard)
+def new_series_handler(sender, instance, **kwargs):
+    """
+    When a game is updated, update is sent to the 'series' group.
+    """
+    game = instance.game
+    send_game_update(game)
+
+@receiver(post_save, sender=Trick)
+def new_series_handler(sender, instance, **kwargs):
+    """
+    When a game is updated, update is sent to the 'series' group.
+    """
+    game = instance.game
+    send_game_update(game)
+
+

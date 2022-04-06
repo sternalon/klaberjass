@@ -73,14 +73,6 @@ class SeriesBoard extends React.Component {
     }
 
 
-    handleData(data) {
-        //receives messages from the connected websocket
-        let result = JSON.parse(data)
-        this.setState({series: result.series,
-                       squares: result.squares
-                       })
-
-    }
 
     sendSocketMessage(message){
         // sends message to channels back-end
@@ -179,8 +171,7 @@ class SeriesBoard extends React.Component {
                    {this.renderDealOrLoading()}
 
 
-            <Websocket ref="socket" url={this.props.socket}
-                    onMessage={this.handleData.bind(this)} reconnect={true}/>
+
             </div>
         )
     }

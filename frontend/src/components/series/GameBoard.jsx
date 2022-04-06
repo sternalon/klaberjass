@@ -69,27 +69,48 @@ class GameBoard extends React.Component {
             }
            }
 
+    setStateWithGameResult(game){
+        var ordered_players = this.orderPlayers(game.players)
+        this.setState({
+                game: game,
+                current_player: ordered_players[0],
+                players: ordered_players,
+                hand: this.unplayedCards(ordered_players[0].hand),
+                left_hand: this.unplayedCards(ordered_players[1].hand),
+                right_hand: this.unplayedCards(ordered_players[2].hand),
+                top_hand: this.unplayedCards(ordered_players[3].hand),
+                current_trick : this.orderCardsInTrick(game.current_trick.cards, ordered_players)
+            })
+    }
+
+
+
 
     // custom methods
     getGame(){
          const game_url = 'http://127.0.0.1:8000/game-from-id/' + this.props.game_id
          this.serverRequest = $.get(game_url, function (result) {
             console.log("Game Result", result)
-            var players = this.orderPlayers(result.game.players)
-            this.setState({
-                game: result.game,
-                current_player: players[0],
-                players: players,
-//              current_player: this.currentPlayer(result.game.players),
-//              position: this.getPosition(result.game.players),
-//              hand: this.currentPlayerHand(result.game.players),
-                hand: this.unplayedCards(players[0].hand),
-                left_hand: this.unplayedCards(players[1].hand),
-                right_hand: this.unplayedCards(players[2].hand),
-                top_hand: this.unplayedCards(players[3].hand),
-                current_trick : this.orderCardsInTrick(result.game.current_trick.cards, players)
-            })
+            this.setStateWithGameResult(result.game)
+//             var players = this.orderPlayers(result.game.players)
+//             this.setState({
+//                 game: result.game,
+//                 current_player: players[0],
+//                 players: players,
+//                 hand: this.unplayedCards(players[0].hand),
+//                 left_hand: this.unplayedCards(players[1].hand),
+//                 right_hand: this.unplayedCards(players[2].hand),
+//                 top_hand: this.unplayedCards(players[3].hand),
+//                 current_trick : this.orderCardsInTrick(result.game.current_trick.cards, players)
+//             })
         }.bind(this))
+    }
+
+     handleData(data) {
+        //receives messages from the connected websocket
+        let result = JSON.parse(data)
+        console.log("Incoming Game Data !!!!!!!", result)
+        this.setStateWithGameResult(result)
     }
 
     convertCardToString(card){
@@ -156,56 +177,7 @@ class GameBoard extends React.Component {
     }
 
 
-//     currentPlayerHand(players){
-//     if (players){
-//         for (let i = 0; i < players.length; i++) {
-//             if (players[i].user == this.state.current_user.id){
-//                 console.log("Current Player Hand", players[i].hand)
-//                 return (
-//                         this.unplayedCards(players[i].hand)
-//                 )
-//
-//             }
-//         }
-//         }else{
-//         return null}
-//     }
 
-//     currentPlayer(players){
-//     if (players){
-//         for (let i = 0; i < players.length; i++) {
-//             if (players[i].user == this.state.current_user.id){
-//                 console.log("Current Player", players[i])
-//                 return (
-//                         players[i]
-//                 )
-//
-//             }
-//         }
-//         }else{
-//         return null}
-//     }
-
-
-
-
-//      getPosition(players){
-//         for (let i = 0; i < players.length; i++) {
-//             if (players[i].username == this.state.current_user.username){
-//                 return players[i].position
-//             }
-//         }
-//     }
-
-
-    handleData(data) {
-        //receives messages from the connected websocket
-        let result = JSON.parse(data)
-        this.setState({game: result.game,
-//                        squares: result.squares
-                       })
-
-    }
 
     sendSocketMessage(message){
         console.log("KKKKKK", this.refs.socket)
