@@ -3,29 +3,39 @@ import PropTypes from 'prop-types';
 import $ from 'jquery'
 import Websocket from 'react-websocket'
 import Hand from "./react-playing-cards/src/PlayingCard/Hand/Hand";
+import Trick from './Trick'
 
 
 class GameBoard extends React.Component {
     // lifecycle methods
     constructor(props) {
         super(props)
-        this.hand_layout= "spread"
         this.state = {
-            game: null,
+            game_id: this.props.game_id,
             position: null,
             players: null,
-            current_game: null,
             current_user: props.current_user,
-            left_hand:  ["1d", "2c", "3s", "2h", "2d", "2c", "2s", "2h"],
-            right_hand: ["1d", "2c", "3s", "2h", "2d", "2c", "2s", "2h"],
-            top_hand: ["1d", "2c", "3s", "2h", "2d", "2c", "2s", "2h"],
-            hand:  ["1d", "2c", "3s", "2h", "2d", "2c", "2s", "2h"],
+            left_hand:  null,
+            right_hand: null,
+            top_hand: null,
+            hand:  null,
         }
 
         // bind button click
         this.sendSocketMessage = this.sendSocketMessage.bind(this);
-        this.isPlayerTurn = this.isPlayerTurn.bind(this)
+//         this.isPlayerTurn = this.isPlayerTurn.bind(this)
 
+    }
+
+    onDoubleClick(card){
+            var card_dict = this.convertStringToCard(card)
+
+            this.sendSocketMessage({action: "play_card",
+                 game_id: this.state.game_id, number:card_dict["number"], suit:card_dict["suit"], trick_id: this.state.game.current_trick.id})
+    }
+
+    doNothingonDoubleClick(keys){
+//         console.log("Do Nothing")
     }
 
 
@@ -39,8 +49,9 @@ class GameBoard extends React.Component {
     }
 
     _getCardSize() {
-        let cardSize = window.innerWidth / this.state.hand.length;
-        return this.state.layout !== "spread" || cardSize > 100 ? 100 : cardSize;
+        return 100
+//         let cardSize = window.innerWidth / this.state.hand.length;
+//         return this.state.layout !== "spread" || cardSize > 100 ? 100 : cardSize;
     }
 
     _getHandPositions() {
@@ -52,25 +63,58 @@ class GameBoard extends React.Component {
             }
            }
 
+    setStateWithGameResult(game){
+        var ordered_players = this.orderPlayers(game.players)
+        this.setState({
+                game: game,
+                current_player: ordered_players[0],
+                players: ordered_players,
+                hand: this.unplayedCards(ordered_players[0].hand),
+                left_hand: this.unplayedCards(ordered_players[1].hand),
+                right_hand: this.unplayedCards(ordered_players[2].hand),
+                top_hand: this.unplayedCards(ordered_players[3].hand),
+                current_trick : {
+                    cards: this.orderCardsInTrick(game.current_trick.cards, ordered_players),
+                    winner: this.winnerDirection(game.current_trick.winner, ordered_players),
+                    closed: game.current_trick.closed,
+                    number: game.current_trick.number
+                    }
+            })
+            console.log("Current Game State", this.state)
+    }
+
+
+
 
     // custom methods
     getGame(){
          const game_url = 'http://127.0.0.1:8000/game-from-id/' + this.props.game_id
          this.serverRequest = $.get(game_url, function (result) {
             console.log("Game Result", result)
-            this.setState({
-                game: result.game,
-//               position: this.getPosition(result.game.players),
-                 players: result.game.players,
-                 hand: this.currentPlayerHand(result.game.players)
-            })
+            this.setStateWithGameResult(result.game)
         }.bind(this))
+    }
+
+     handleData(data) {
+        //receives messages from the connected websocket
+        let result = JSON.parse(data)
+        console.log("Incoming Game Data !!!!!!!", result)
+        this.setStateWithGameResult(result)
     }
 
     convertCardToString(card){
         var suitMap = { 'spade': "s", 'heart': "h", 'diamond': "d", "club":"c" };
         var numberMap = { 'ace': "1", 'two': "2", 'three': "3", "four":"4", "five":"5", "six":"6", "seven":"7", "eight":"8", "nine":"9", "ten":"10", "jack":"j", "queen":"q", "king":"k" };
         return numberMap[card.number] + suitMap[card.suit]
+    }
+
+    convertStringToCard(card){
+        var suit = card[card.length-1]
+        var number =  card.slice(0, -1)
+
+        var suitMap = { "s":'spade', "h":'heart', "d":'diamond', "c":"club"};
+        var numberMap = { "1":'ace', "2":'two', "3":'three', "4":"four", "5":"five", "6":"six", "7":"seven", "8":"eight", "9":"nine", "10": "ten", "j":"jack", "q":"queen", "k":"king"};
+        return {"number": numberMap[number] , "suit": suitMap[suit]}
     }
 
     unplayedCards(cards){
@@ -83,38 +127,60 @@ class GameBoard extends React.Component {
         return unplayed
     }
 
-    currentPlayerHand(players){
-    if (players){
+    currentPlayerIndex(players){
         for (let i = 0; i < players.length; i++) {
-            if (players[i].user == this.state.current_user.id){
-                console.log("AAAAA", players[i].hand)
-                return (
-                        this.unplayedCards(players[i].hand)
-                )
+                if (players[i].user == this.state.current_user.id){
+                    return i
+                }
+             }
+    }
 
+    orderPlayers(players){
+        if (players){
+             var current_player_ind = this.currentPlayerIndex(players)
+             return [
+                players[(0 + current_player_ind) % 4],
+                players[(1 + current_player_ind) % 4],
+                players[(2 + current_player_ind) % 4],
+                players[(3 + current_player_ind) % 4]
+                ]
+        }else{
+            return null
+            }
+    }
+
+    orderCardsInTrick(cards, players){
+    var ordered_trick = [null, null, null, null]
+    if (cards){
+        for (let i = 0; i < cards.length; i++) {
+            for (let j = 0; j < players.length; j++) {
+                if (cards[i].user == players[j].user){
+                    ordered_trick[j] = this.convertCardToString(cards[i])
+                    }
+                }
             }
         }
+        return ordered_trick
+
+
+    }
+
+    winnerDirection(winner, players){
+        if (winner){
+            var directionMap = { "0": "bottom", '1': "left", '2': "top", "3":"right" };
+            console.log("Winner", winner, players)
+            for (let j = 0; j < players.length; j++) {
+                if (winner == players[j].id){
+                    return directionMap[j]
+                }
+            }
         }else{
-        return null}
+            return null
+        }
     }
 
-//      getPosition(players){
-//         for (let i = 0; i < players.length; i++) {
-//             if (players[i].username == this.state.current_user.username){
-//                 return players[i].position
-//             }
-//         }
-//     }
 
 
-    handleData(data) {
-        //receives messages from the connected websocket
-        let result = JSON.parse(data)
-        this.setState({game: result.game,
-//                        squares: result.squares
-                       })
-
-    }
 
     sendSocketMessage(message){
         // sends message to channels back-end
@@ -122,102 +188,81 @@ class GameBoard extends React.Component {
        socket.state.ws.send(JSON.stringify(message))
     }
 
-    isPlayerTurn(){
-        if (this.props.current_user.id == this.state.series.current_turn.id){
-            return true
-        }else{
-            return false
+//     isPlayerTurn(){
+//         if (this.props.current_user.id == this.state.series.current_turn.id){
+//             return true
+//         }else{
+//             return false
+//         }
+//     }
+
+
+    renderTrick() {
+    if (this.state.current_trick){
+        var trick_cards =  this.state.current_trick.cards
+
+            if (trick_cards != null){
+              return (
+                 <div id="Trick"  >
+                    <Trick bottom_card = {trick_cards[0]} left_card = {trick_cards[1]} top_card = {trick_cards[2]} right_card = {trick_cards[3]} winner = {this.state.current_trick.winner} />
+                 </div>
+              )
+           }
+       }
+  }
+
+
+
+    renderLeftHand(){
+        if (this.state.left_hand){
+            return(
+                <div id='left' style={this._getHandPositions().left}>
+                        <Hand hide={true} layout={"spread"} onDoubleClick={this.doNothingonDoubleClick.bind(this)} cards={this.state.left_hand} cardSize={0.8*this._getCardSize()}/>
+
+                 </div>
+            )
+        }
+    }
+
+    renderRightHand(){
+        if (this.state.right_hand){
+            return(
+                <div id='right' style={this._getHandPositions().right}>
+                    <Hand hide={true} layout={"spread"} onDoubleClick={this.doNothingonDoubleClick.bind(this)} cards={this.state.right_hand} cardSize={0.8*this._getCardSize()}/>
+
+                </div>
+            )
+        }
+    }
+
+    renderTopHand(){
+        if (this.state.top_hand){
+            return(
+                 <div id='top' style={this._getHandPositions().top}>
+                    <Hand hide={true} layout={"spread"} onDoubleClick={this.doNothingonDoubleClick.bind(this)} cards={this.state.top_hand} cardSize={1.2*this._getCardSize()}/>
+                </div>
+            )
+        }
+    }
+
+    renderBottomHand(){
+        if (this.state.hand){
+            return(
+                 <div id='bottom' style={this._getHandPositions().bottom}>
+                     <Hand hide={false} onDoubleClick={this.onDoubleClick.bind(this)} layout={"spread"} cards={this.state.hand} cardSize={1.5*this._getCardSize()}/>
+             </div>
+            )
         }
     }
 
 
-
-    // ----  RENDER FUNCTIONS ---- //
-    // --------------------------- //
-    renderRow(row_num, cols) {
-
-        let row = cols.map(function(square){
-
-           // for each col, render a square for this row
-           return <GameSquare game_creator={this.state.game.creator.id}
-                              key={square.id}
-                              owner={square.owner}
-                              square_id={square.id}
-                              possession_type={square.status}
-                              loc_x={parseInt(square.col)}
-                              loc_y={parseInt(square.row)}
-                              sendSocketMessage={this.sendSocketMessage}
-                              isPlayerTurn={this.isPlayerTurn}
-                              />
-        }.bind(this))
-
-        return (
-            <tr key={row_num}>{row}</tr>
-        )
-    }
-
-    renderBoard() {
-        // renders the obstruction grid/board
-        // build by row and then by col, based on the height and width values
-        let board = []
-        let cur_row = -1
-        // for each rown
-        if (this.state.game != null && this.state.squares != null){
-            // build the squares
-            // if this is a new row, get the cols
-            board = this.state.squares.map(function(square){
-                if (square.row != cur_row){
-                    // new row
-                    cur_row = square.row
-                    // get just current row cols
-                    let row_cols = this.state.squares.filter(function(c){
-                        if (c.row == cur_row){
-                            return c
-                        }
-                    })
-                    // with array of cols for this row, render it out
-                    //board.push(this.renderRow(cur_row, row_cols))
-                   return this.renderRow(cur_row, row_cols )
-                }
-
-             }, this)
-
-        }else{
-           board = <tr><td>'LOADING...'</td></tr>
-
-        }
-        return board
-    }
-
-
-
-
-    renderDeck() {
-        const hand_layout = "spread"
-
+    renderHands() {
       return (
           <div>
-
-
-            <div id='top' style={this._getHandPositions().top}>
-                    <Hand hide={true} layout={hand_layout} cards={this.state.top_hand} cardSize={1.2*this._getCardSize()}/>
-             </div>
-
-
-            <div id='bottom' style={this._getHandPositions().bottom}>
-                     <Hand hide={false} layout={hand_layout} cards={this.state.hand} cardSize={1.5*this._getCardSize()}/>
-             </div>
-
-             <div id='left' style={this._getHandPositions().left}>
-                    <Hand hide={true} layout={hand_layout} cards={this.state.left_hand} cardSize={0.8*this._getCardSize()}/>
-
-             </div>
-
-              <div id='right' style={this._getHandPositions().right}>
-                    <Hand hide={true} layout={hand_layout} cards={this.state.right_hand} cardSize={0.8*this._getCardSize()}/>
-
-             </div>
-
+             {this.renderLeftHand()}
+             {this.renderRightHand()}
+             {this.renderTopHand()}
+             {this.renderBottomHand()}
           </div>
       );
   }
@@ -238,12 +283,12 @@ class GameBoard extends React.Component {
 
 
     render() {
-        console.log("This is the gameboard", this.props.game_id)
         return (
-            <div className="row">
+            <div >
 
 
-                   {this.renderDeck()}
+                   {this.renderHands()}
+                   {this.renderTrick()}
 
 
             <Websocket ref="socket" url={this.props.socket}

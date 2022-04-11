@@ -173,11 +173,17 @@ class JassRules():
     def is_over_trump(self, card):
         # TODO: Needs to be tested
         """Returns whether card is an over trump (False if card is not a trump. True if no trumps in trick)"""
-        return self.is_trump(card) and self.trick.is_better(card, self.trick.top_trump)
+        if self.trick.top_trump:
+            return self.is_trump(card) and self.trick.is_better(card, self.trick.top_trump)
+        else:
+            return self.is_trump(card)
 
     def can_overtrump(self):
         """Returns true if hand has a higher trump than the top trump in the trick"""
-        return any([self.trick.is_better(card, self.trick.top_trump) for card in self.hand])
+        if self.trick.top_trump:
+            return any([self.trick.is_better(card, self.trick.top_trump) for card in self.hand])
+        else:
+            return any([self.is_trump(card) for card in self.hand])
 
     def get_legal_cards(self):
         return [card for card in self.hand if self.validate_play(card)[0] is True]

@@ -71,3 +71,4 @@ class SingleGameViewSet(APIView):
         game_serializer = GameSerializer(game)
         return_data = {'game': game_serializer.data}
         return Response(return_data)
+
