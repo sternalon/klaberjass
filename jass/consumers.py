@@ -97,18 +97,16 @@ class SeriesConsumer(JsonWebsocketConsumer):
             game_id = content['game_id']
             suit = content['suit']
             number = content['number']
-            trick_id = content['trick_id']
             card = Card(number=number , suit = suit)
 
-            trick = Trick.get_by_id(trick_id)
-
-
+            game = Game.get_by_id(game_id)
+            trick = game.get_current_or_next_trick()
             playing_card = PlayingCard.get_by_game_and_card(game_id, card.card_number)
+
             valid, message = playing_card.play(trick)
-            print("ZZZZZ", valid, message)
+            print("Response from playing card:", valid, message)
 
             if valid:
-                game = Game.get_by_id((game_id))
                 signals.send_game_update(game)
 
 

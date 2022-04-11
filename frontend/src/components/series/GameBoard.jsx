@@ -23,19 +23,13 @@ class GameBoard extends React.Component {
 
         // bind button click
         this.sendSocketMessage = this.sendSocketMessage.bind(this);
-        this.isPlayerTurn = this.isPlayerTurn.bind(this)
+//         this.isPlayerTurn = this.isPlayerTurn.bind(this)
 
     }
 
     onDoubleClick(card){
-            console.log("DDDDDDDD", card, this.state.game_id)
             var card_dict = this.convertStringToCard(card)
-            console.log("EEEEEE", card_dict["number"])
-            console.log("FFFFFFF", card_dict["suit"])
-            console.log("WWWWWW", this.state.game.current_trick.id)
 
-
-//             this.find_card_id()
             this.sendSocketMessage({action: "play_card",
                  game_id: this.state.game_id, number:card_dict["number"], suit:card_dict["suit"], trick_id: this.state.game.current_trick.id})
     }
@@ -79,8 +73,14 @@ class GameBoard extends React.Component {
                 left_hand: this.unplayedCards(ordered_players[1].hand),
                 right_hand: this.unplayedCards(ordered_players[2].hand),
                 top_hand: this.unplayedCards(ordered_players[3].hand),
-                current_trick : this.orderCardsInTrick(game.current_trick.cards, ordered_players)
+                current_trick : {
+                    cards: this.orderCardsInTrick(game.current_trick.cards, ordered_players),
+                    winner: this.winnerDirection(game.current_trick.winner, ordered_players),
+                    closed: game.current_trick.closed,
+                    number: game.current_trick.number
+                    }
             })
+            console.log("Current Game State", this.state)
     }
 
 
@@ -92,17 +92,6 @@ class GameBoard extends React.Component {
          this.serverRequest = $.get(game_url, function (result) {
             console.log("Game Result", result)
             this.setStateWithGameResult(result.game)
-//             var players = this.orderPlayers(result.game.players)
-//             this.setState({
-//                 game: result.game,
-//                 current_player: players[0],
-//                 players: players,
-//                 hand: this.unplayedCards(players[0].hand),
-//                 left_hand: this.unplayedCards(players[1].hand),
-//                 right_hand: this.unplayedCards(players[2].hand),
-//                 top_hand: this.unplayedCards(players[3].hand),
-//                 current_trick : this.orderCardsInTrick(result.game.current_trick.cards, players)
-//             })
         }.bind(this))
     }
 
@@ -176,96 +165,53 @@ class GameBoard extends React.Component {
 
     }
 
+    winnerDirection(winner, players){
+        if (winner){
+            var directionMap = { "0": "bottom", '1': "left", '2': "top", "3":"right" };
+            console.log("Winner", winner, players)
+            for (let j = 0; j < players.length; j++) {
+                if (winner == players[j].id){
+                    return directionMap[j]
+                }
+            }
+        }else{
+            return null
+        }
+    }
+
 
 
 
     sendSocketMessage(message){
-        console.log("KKKKKK", this.refs.socket)
-
-
         // sends message to channels back-end
        const socket = this.refs.socket
        socket.state.ws.send(JSON.stringify(message))
     }
 
-    isPlayerTurn(){
-        if (this.props.current_user.id == this.state.series.current_turn.id){
-            return true
-        }else{
-            return false
-        }
-    }
+//     isPlayerTurn(){
+//         if (this.props.current_user.id == this.state.series.current_turn.id){
+//             return true
+//         }else{
+//             return false
+//         }
+//     }
 
-
-
-    // ----  RENDER FUNCTIONS ---- //
-    // --------------------------- //
-    renderRow(row_num, cols) {
-
-        let row = cols.map(function(square){
-
-           // for each col, render a square for this row
-           return <GameSquare game_creator={this.state.game.creator.id}
-                              key={square.id}
-                              owner={square.owner}
-                              square_id={square.id}
-                              possession_type={square.status}
-                              loc_x={parseInt(square.col)}
-                              loc_y={parseInt(square.row)}
-                              sendSocketMessage={this.sendSocketMessage}
-                              isPlayerTurn={this.isPlayerTurn}
-                              />
-        }.bind(this))
-
-        return (
-            <tr key={row_num}>{row}</tr>
-        )
-    }
-
-    renderBoard() {
-        // renders the obstruction grid/board
-        // build by row and then by col, based on the height and width values
-        let board = []
-        let cur_row = -1
-        // for each rown
-        if (this.state.game != null && this.state.squares != null){
-            // build the squares
-            // if this is a new row, get the cols
-            board = this.state.squares.map(function(square){
-                if (square.row != cur_row){
-                    // new row
-                    cur_row = square.row
-                    // get just current row cols
-                    let row_cols = this.state.squares.filter(function(c){
-                        if (c.row == cur_row){
-                            return c
-                        }
-                    })
-                    // with array of cols for this row, render it out
-                    //board.push(this.renderRow(cur_row, row_cols))
-                   return this.renderRow(cur_row, row_cols )
-                }
-
-             }, this)
-
-        }else{
-           board = <tr><td>'LOADING...'</td></tr>
-
-        }
-        return board
-    }
 
     renderTrick() {
-    var current_trick =  this.state.current_trick
+    if (this.state.current_trick){
+        var trick_cards =  this.state.current_trick.cards
 
-        if (this.state.current_trick != null){
-          return (
-             <div >
-                <Trick bottom_card = {current_trick[0]} left_card = {current_trick[1]} top_card = {current_trick[2]} right_card = {current_trick[3]}  />
-             </div>
-          )
+            if (trick_cards != null){
+              return (
+                 <div id="Trick"  >
+                    <Trick bottom_card = {trick_cards[0]} left_card = {trick_cards[1]} top_card = {trick_cards[2]} right_card = {trick_cards[3]} winner = {this.state.current_trick.winner} />
+                 </div>
+              )
+           }
        }
   }
+
+
 
     renderLeftHand(){
         if (this.state.left_hand){
@@ -342,7 +288,6 @@ class GameBoard extends React.Component {
 
 
                    {this.renderHands()}
-
                    {this.renderTrick()}
 
 

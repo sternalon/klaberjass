@@ -152,15 +152,23 @@ class Game(models.Model):
     def get_tricks(self):
         return list(Trick.objects.filter(game=self).order_by('number'))
 
+    def get_current_or_next_trick(self):
+        trick = self.get_current_trick()
+        if trick.winner:
+            trick.closed = True
+            trick.save()
+            trick = self.get_current_trick()
+        return trick
+
     def get_current_trick(self):
-        open_tricks = Trick.objects.filter(game=self, winner = None).order_by('number')
+        open_tricks = Trick.objects.filter(game=self, closed = False).order_by('number')
         if len(open_tricks) > 0:
             return open_tricks[0]
         else:
             return None
 
     def get_previous_trick(self):
-        open_tricks = Trick.objects.filter(game=self).exclude(winner=None).order_by('-number')
+        open_tricks = Trick.objects.filter(game=self).exclude(closed=False).order_by('-number')
         if len(open_tricks) > 0:
             return open_tricks[0]
         else:
@@ -237,6 +245,7 @@ class Trick(models.Model):
     game = models.ForeignKey(Game, related_name="tricks", on_delete=models.CASCADE)
     winner = models.ForeignKey(Player, on_delete=models.CASCADE, null = True)
     number = models.SmallIntegerField()
+    closed = models.BooleanField(default=False, null = False)
 
     @staticmethod
     def get_by_id(id):
@@ -268,9 +277,14 @@ class Trick(models.Model):
             previous_trick = Trick.objects.get(game=self.game, number = self.number -1)
             return previous_trick.winner
 
-    def close_or_pass(self):
+    def set_winner_or_pass(self):
         if self.num_cards_played() == self.game.get_num_players():
             self.set_winner()
+
+    def close_or_pass(self):
+        if self.winner:
+            self.closed = False
+            self.save()
 
     def set_winner(self):
         # TODO: Get Card Look up to use as_number automatically.
@@ -304,7 +318,7 @@ class PlayingCard(models.Model):
             self.order_in_trick = trick.num_cards_played() + 1
             self.played = True
             self.save()
-            trick.close_or_pass()
+            trick.set_winner_or_pass()
         return valid, message
 
 

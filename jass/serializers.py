@@ -50,7 +50,7 @@ class TrickSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Trick
-        fields = ('id', 'game', 'winner', 'number', 'cards')
+        fields = ('id', 'game', 'winner', 'number', 'cards', "closed")
 
 class GameSerializer(serializers.ModelSerializer):
     current_trick = serializers.SerializerMethodField()
