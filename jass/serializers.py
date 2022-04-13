@@ -12,6 +12,7 @@ class UserSerializer(serializers.ModelSerializer):
 class PlayingCardSerializer(serializers.ModelSerializer):
     suit = serializers.SerializerMethodField()
     number = serializers.SerializerMethodField()
+    user = serializers.SerializerMethodField()
 
     def get_suit(self, obj):
         return obj.card.suit if obj.card else None
@@ -19,45 +20,56 @@ class PlayingCardSerializer(serializers.ModelSerializer):
     def get_number(self, obj):
         return obj.card.number if obj.card else None
 
+    def get_user(self, obj):
+        return obj.player.user.id if obj.player else None
+
     class Meta:
         model = PlayingCard
-        fields = ('id', 'suit', 'number', 'player', 'game', 'trick', 'order_in_trick', 'played')
-
+        fields = ('id', 'suit', 'number', 'player', 'game', 'trick', 'order_in_trick', 'played', 'user')
 
 class PlayerSerializer(serializers.ModelSerializer):
     hand = serializers.SerializerMethodField()
+    username = serializers.SerializerMethodField()
 
     def get_hand(self, obj):
         hand = obj.get_hand()
         hand = [PlayingCardSerializer(card).data for card in hand]
         return hand
 
+    def get_username(self, obj):
+        username = obj.get_username()
+        return username
+
     class Meta:
         model = Player
-        fields = ('id', 'user', 'position', 'game', 'hand')
+        fields = ('id', 'user', 'username', 'position', 'game', 'hand')
 
 
 class TrickSerializer(serializers.ModelSerializer):
+    cards = PlayingCardSerializer(many=True)
+
     class Meta:
         model = Trick
-        fields = ('id', 'game', 'winner', 'number', 'cards')
+        fields = ('id', 'game', 'winner', 'number', 'cards', "closed")
 
 class GameSerializer(serializers.ModelSerializer):
-    # cards = PlayingCardSerializer(many=True)
     current_trick = serializers.SerializerMethodField()
-    # tricks = TrickSerializer(many=True)
+    previous_trick = serializers.SerializerMethodField()
     players = PlayerSerializer(many= True)
 
     # TODO: Might want to only return the current trick is performance is slow
 
     def get_current_trick(self,obj):
         current_trick = obj.get_current_trick()
-        return current_trick.id if current_trick else None
+        return TrickSerializer(current_trick).data
+
+    def get_previous_trick(self,obj):
+        current_trick = obj.get_previous_trick()
+        return TrickSerializer(current_trick).data
 
     class Meta:
         model = Game
-        # fields = ('id', 'number', 'trumps', 'completed', 'cards', 'current_trick', 'players')
-        fields = ('id', 'number', 'trumps', 'completed', 'current_trick','players')
+        fields = ('id', 'number', 'trumps', 'completed', 'current_trick', 'previous_trick', 'players')
         depth = 2
 
 class SeriesPlayersSerializer(serializers.ModelSerializer):

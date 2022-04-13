@@ -66,29 +66,6 @@ class Series(models.Model):
         else:
             return None
 
-    def send_series_update(self):
-        """
-        Send the updated series information to the series's channel group
-        """
-        pass
-        # # imported here to avoid circular import
-        # from serializers import GameSquareSerializer, GameLogSerializer, GameSerializer
-        #
-        # squares = self.get_all_game_squares()
-        # square_serializer = GameSquareSerializer(squares, many=True)
-        #
-        # # get game log
-        # log = self.get_game_log()
-        # log_serializer = GameLogSerializer(log, many=True)
-        #
-        # game_serilizer = GameSerializer(self)
-        #
-        # message = {'game': game_serilizer.data,
-        #            'log': log_serializer.data,
-        #            'squares': square_serializer.data}
-        #
-        # game_group = 'game-{0}'.format(self.id)
-        # Group(game_group).send({'text': json.dumps(message)})
 
 
 class SeriesPlayer(models.Model):
@@ -175,8 +152,23 @@ class Game(models.Model):
     def get_tricks(self):
         return list(Trick.objects.filter(game=self).order_by('number'))
 
+    def get_current_or_next_trick(self):
+        trick = self.get_current_trick()
+        if trick.winner:
+            trick.closed = True
+            trick.save()
+            trick = self.get_current_trick()
+        return trick
+
     def get_current_trick(self):
-        open_tricks = Trick.objects.filter(game=self, winner = None).order_by('number')
+        open_tricks = Trick.objects.filter(game=self, closed = False).order_by('number')
+        if len(open_tricks) > 0:
+            return open_tricks[0]
+        else:
+            return None
+
+    def get_previous_trick(self):
+        open_tricks = Trick.objects.filter(game=self).exclude(closed=False).order_by('-number')
         if len(open_tricks) > 0:
             return open_tricks[0]
         else:
@@ -202,6 +194,10 @@ class Player(models.Model):
 
     def get_hand(self):
         return list(PlayingCard.objects.filter(game=self.game, player=self))
+
+    def get_username(self):
+        return self.user.username
+
 
     def get_unplayed_hand(self):
         return list(PlayingCard.objects.filter(game=self.game, player=self, played=False))
@@ -249,6 +245,11 @@ class Trick(models.Model):
     game = models.ForeignKey(Game, related_name="tricks", on_delete=models.CASCADE)
     winner = models.ForeignKey(Player, on_delete=models.CASCADE, null = True)
     number = models.SmallIntegerField()
+    closed = models.BooleanField(default=False, null = False)
+
+    @staticmethod
+    def get_by_id(id):
+        return Trick.objects.get(id=id)
 
     def to_play(self):
         lead_position = self.lead().position
@@ -276,9 +277,14 @@ class Trick(models.Model):
             previous_trick = Trick.objects.get(game=self.game, number = self.number -1)
             return previous_trick.winner
 
-    def close_or_pass(self):
+    def set_winner_or_pass(self):
         if self.num_cards_played() == self.game.get_num_players():
             self.set_winner()
+
+    def close_or_pass(self):
+        if self.winner:
+            self.closed = False
+            self.save()
 
     def set_winner(self):
         # TODO: Get Card Look up to use as_number automatically.
@@ -300,6 +306,10 @@ class PlayingCard(models.Model):
     class Meta:
         unique_together = ('card', 'game',)
 
+    @staticmethod
+    def get_by_game_and_card(game, card):
+        return PlayingCard.objects.get(game=game, card=card)
+
 
     def play(self, trick):
         valid, message = self.valid_play(trick)
@@ -308,7 +318,7 @@ class PlayingCard(models.Model):
             self.order_in_trick = trick.num_cards_played() + 1
             self.played = True
             self.save()
-            trick.close_or_pass()
+            trick.set_winner_or_pass()
         return valid, message
 
 

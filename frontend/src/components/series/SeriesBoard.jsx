@@ -14,7 +14,7 @@ class SeriesBoard extends React.Component {
         this.state = {
             series: null,
             position: null,
-            players: null,
+            users: null,
             current_game: null,
             current_user: props.current_user,
             hand: {
@@ -56,32 +56,23 @@ class SeriesBoard extends React.Component {
     getSeries(){
          const series_url = 'http://127.0.0.1:8000/series-from-id/' + this.props.series_id
          this.serverRequest = $.get(series_url, function (result) {
-            console.log("Result from getSeries API: ", result)
             this.setState({
                 series: result.series,
                 position: this.getPosition(result.series.players),
-                players: result.series.players,
+                users: result.series.players,
             })
         }.bind(this))
     }
 
-     getPosition(players){
-        for (let i = 0; i < players.length; i++) {
-            if (players[i].username == this.state.current_user.username){
-                return players[i].position
+     getPosition(users){
+        for (let i = 0; i < users.length; i++) {
+            if (users[i].username == this.state.current_user.username){
+                return users[i].position
             }
         }
     }
 
 
-    handleData(data) {
-        //receives messages from the connected websocket
-        let result = JSON.parse(data)
-        this.setState({series: result.series,
-                       squares: result.squares
-                       })
-
-    }
 
     sendSocketMessage(message){
         // sends message to channels back-end
@@ -93,8 +84,8 @@ class SeriesBoard extends React.Component {
 
     getPlayerName(position){
         var position_mod_4 = position % 4
-        if (this.state.players[position_mod_4]){
-            return this.state.players[position_mod_4].username
+        if (this.state.users[position_mod_4]){
+            return this.state.users[position_mod_4].username
            }else{
                return null
            }
@@ -103,7 +94,7 @@ class SeriesBoard extends React.Component {
 
     renderNames() {
         var player_position = this.state.position -1
-        if (this.state.players) {
+        if (this.state.users) {
               return (
                   <div>
 
@@ -155,8 +146,8 @@ class SeriesBoard extends React.Component {
     }
 
     renderDealOrLoading() {
-        if (this.state.players){
-            if (this.state.players.length<4){
+        if (this.state.users){
+            if (this.state.users.length<4){
                 return this.renderRefreshButton()
             }else{
                 if (this.state.series != null){
@@ -173,7 +164,6 @@ class SeriesBoard extends React.Component {
 
 
     render() {
-        console.log("You are now in the SeriesBoard in series", this.props.series_id)
         return (
             <div className="row">
 
@@ -181,8 +171,7 @@ class SeriesBoard extends React.Component {
                    {this.renderDealOrLoading()}
 
 
-            <Websocket ref="socket" url={this.props.socket}
-                    onMessage={this.handleData.bind(this)} reconnect={true}/>
+
             </div>
         )
     }
