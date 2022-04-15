@@ -4,7 +4,7 @@ import $ from 'jquery'
 import Websocket from 'react-websocket'
 import Hand from "./react-playing-cards/src/PlayingCard/Hand/Hand";
 import GameBoard from './GameBoard'
-// import GameSquare from './GameSquare'
+import Scoreboard from './Scoreboard'
 
 
 class SeriesBoard extends React.Component {
@@ -145,6 +145,14 @@ class SeriesBoard extends React.Component {
         )
     }
 
+    Scoreboard(){
+        return (
+            <div >
+                    <Scoreboard score1="1" score1="2" />
+            </div>
+        )
+    }
+
     renderDealOrLoading() {
         if (this.state.users){
             if (this.state.users.length<4){
@@ -169,6 +177,7 @@ class SeriesBoard extends React.Component {
 
                    {this.renderNames()}
                    {this.renderDealOrLoading()}
+                   {this.Scoreboard()}
 
 
 

@@ -9,7 +9,6 @@ import PlayingCard from './react-playing-cards/src/PlayingCard/Hand/PlayingCard/
 class Trick extends Component {
     constructor(props){
     super(props);
-    this.wrapperRef =  React.createRef();
     this.state = {
         current_player: null,
         bottom_card: null,
