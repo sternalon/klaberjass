@@ -146,11 +146,16 @@ class SeriesBoard extends React.Component {
     }
 
     renderScoreboard(){
+        if (this.state.users!=null){
+
+            var team1 = this.state.users[0].username.concat(" & " , this.state.users[2].username)
+            var team2 = this.state.users[1].username.concat(" & " , this.state.users[3].username)
+
         return (
             <div >
-                    <Scoreboard score1="1" score1="2" />
+                    <Scoreboard score1={this.state.series.score1} score2={this.state.series.score2} team1={team1} team2={team2}/>
             </div>
-        )
+        )}
     }
 
     renderDealOrLoading() {
@@ -172,6 +177,7 @@ class SeriesBoard extends React.Component {
 
 
     render() {
+        console.log("AAAAA", this.state)
         return (
             <div className="row">
 
