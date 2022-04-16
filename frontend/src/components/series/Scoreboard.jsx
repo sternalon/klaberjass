@@ -43,22 +43,22 @@ class Scoreboard extends Component {
   return (
     <div>
       <div style={{"display":this.state.modalIsOpen, }}  >
-        <div class="modal-dialog" role="document">
-            <div class="modal-content">
-                 <div class="modal-header">
-                    <h2 class="modal-title" id="exampleModalLabel">Modal title</h2>
-                    <button type="button" class="close" onClick={closeModal.bind(this)} aria-label="Close">
+        <div className="modal-dialog" role="document">
+            <div className="modal-content">
+                 <div className="modal-header">
+                    <button type="button" className="close" onClick={closeModal.bind(this)} aria-label="Close">
                       <span aria-hidden="true">&times;</span>
                     </button>
+                    <h2 className="modal-title" id="exampleModalLabel">Scoreboard</h2>
                   </div>
 
-                   <div class="modal-body">
-                    I am a modal
+                   <div className="modal-body">
+                    Scoreboard Goes Here
                   </div>
 
-                 <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" onClick={closeModal.bind(this)}>Close</button>
-                    <button type="button" class="btn btn-primary">Save changes</button>
+                 <div className="modal-footer">
+                    <button type="button" className="btn btn-secondary" onClick={closeModal.bind(this)}>Close</button>
+                    <button type="button" className="btn btn-primary">Save changes</button>
                 </div>
             </div>
          </div>
@@ -71,9 +71,9 @@ class Scoreboard extends Component {
 
 renderButton() {
   return (
-    <div id='previousTrick' style={{'bottom': '2%', 'left': '2%', 'position': 'absolute'} }    >
-      <button type="button" class="btn btn-primary" onClick={openModal.bind(this)} >
-        Previous Trick
+    <div id='scoreboardButton' style={{'bottom': '2%', 'left': '2%', 'position': 'absolute'} }    >
+      <button type="button" className="btn btn-secondary" onClick={openModal.bind(this)}  >
+        . Scoreboard .
       </button>
     </div>
 

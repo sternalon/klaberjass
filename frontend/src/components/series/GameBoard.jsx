@@ -4,6 +4,10 @@ import $ from 'jquery'
 import Websocket from 'react-websocket'
 import Hand from "./react-playing-cards/src/PlayingCard/Hand/Hand";
 import Trick from './Trick'
+import PreviousTrick from './PreviousTrick'
+
+
+
 
 
 class GameBoard extends React.Component {
@@ -19,6 +23,8 @@ class GameBoard extends React.Component {
             right_hand: null,
             top_hand: null,
             hand:  null,
+            previous_trick:  null
+,
         }
 
         // bind button click
@@ -78,7 +84,8 @@ class GameBoard extends React.Component {
                     winner: this.winnerDirection(game.current_trick.winner, ordered_players),
                     closed: game.current_trick.closed,
                     number: game.current_trick.number
-                    }
+                    },
+               previous_trick : this.orderCardsInTrick(game.previous_trick.cards, ordered_players)
             })
             console.log("Current Game State", this.state)
     }
@@ -267,19 +274,30 @@ class GameBoard extends React.Component {
       );
   }
 
-//     currentTurn(){
-//         if (this.state.game){
-//             if (this.state.game.completed != null){
-//                 // game is over
-//                 return <h3>The Winner: <span className="text-primary">{(this.state.game.current_turn.username)}</span></h3>
-//             }else{
-//                 return <h3>Current Turn:
-//                     <span className="text-primary">{(this.state.game.current_turn.username)}</span>
-//                  </h3>
-//             }
-//
-//         }
-//     }
+  trickHasCards(trick){
+    if (trick==null){
+        return false
+        }
+    if (trick.every(element => element === null)){
+        return false
+    } else {
+    return true
+    }
+  }
+
+
+  renderPreviousTrick(){
+        var previous_trick = this.state.previous_trick
+
+        if (this.trickHasCards(previous_trick)){
+                return (
+                    <div >
+                        <PreviousTrick bottom_card = {previous_trick[0]} left_card = {previous_trick[1]} top_card = {previous_trick[2]} right_card = {previous_trick[3]}  />
+                    </div>
+                )
+           }
+    }
+
 
 
     render() {
@@ -289,6 +307,7 @@ class GameBoard extends React.Component {
 
                    {this.renderHands()}
                    {this.renderTrick()}
+                   {this.renderPreviousTrick()}
 
 
             <Websocket ref="socket" url={this.props.socket}
@@ -298,6 +317,7 @@ class GameBoard extends React.Component {
     }
 }
 
+
 GameBoard.propTypes = {
     current_user: PropTypes.object,
     game_id: PropTypes.number,
@@ -305,3 +325,4 @@ GameBoard.propTypes = {
 }
 
 export default GameBoard
+

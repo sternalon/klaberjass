@@ -145,7 +145,7 @@ class SeriesBoard extends React.Component {
         )
     }
 
-    Scoreboard(){
+    renderScoreboard(){
         return (
             <div >
                     <Scoreboard score1="1" score1="2" />
@@ -177,7 +177,7 @@ class SeriesBoard extends React.Component {
 
                    {this.renderNames()}
                    {this.renderDealOrLoading()}
-                   {this.Scoreboard()}
+                   {this.renderScoreboard()}
 
 
 

@@ -15,7 +15,8 @@ class Trick extends Component {
         left_card: null,
         top_card: null,
         right_card: null,
-        winner : null
+        winner : null,
+        previous_trick: false
       }
     // This binding is necessary to make `this` work in the callback
 //     this.handleClick = this.handleClick.bind(this);
@@ -76,9 +77,21 @@ class Trick extends Component {
             }
     }
 
+    _getPreviousTrickPosition(){
+        return {
+                top:{'bottom': '56%', 'left': '40%', 'position': 'absolute', 'height' : '30%', 'transform' : 'rotate(180deg)'},
+                bottom:{'bottom': '18%', 'left': '40%', 'position': 'absolute', 'height' : '30%'},
+                left:{'bottom': '35%', 'left': '00%', 'position': 'absolute', 'transform': 'translateX(90%) rotate(90deg)' },
+                right:{'bottom': '35%','left': '65%', 'position': 'absolute', 'transform': 'rotate(270deg)' },
+            }
+    }
+
 
     _getCardPositions() {
-        if (this.state.winner == null){
+
+        if (this.props.previous_trick == true) {
+            return this._getPreviousTrickPosition()
+         } else if (this.state.winner == null){
             return this._getOpenTrickPosition()
          }else if (this.state.winner == "left"){
             return this._getLeftWinningPosition()
@@ -91,12 +104,23 @@ class Trick extends Component {
          }
        }
 
+    getFlipped(){
+        if (this.props.previous_trick == true){
+            return false
+        }else {
+        return (
+            this.state.winner!=null
+            )
+        }
+
+    }
+
 
    renderLeftCard(){
        if (this.props.left_card){
            return (
                 <div id='left_card' style={this._getCardPositions().left}>
-                           <PlayingCard height={ 150 } card={this.props.left_card} flipped={this.state.winner!=null} elevateOnClick={true} />
+                           <PlayingCard height={ 150 } card={this.props.left_card} flipped={this.getFlipped()} elevateOnClick={true} />
                 </div>
           )
        }
@@ -106,7 +130,7 @@ class Trick extends Component {
        if (this.props.right_card){
            return (
                 <div id='right_card' style={this._getCardPositions().right}>
-                   <PlayingCard height={ 150 } card={this.props.right_card} flipped={this.state.winner!=null} elevateOnClick={true} />
+                   <PlayingCard height={ 150 } card={this.props.right_card} flipped={this.getFlipped()} elevateOnClick={true} />
                 </div>
           )
        }
@@ -116,7 +140,7 @@ class Trick extends Component {
        if (this.props.bottom_card){
            return (
                 <div id='bottom_card' style={this._getCardPositions().bottom}>
-                  <PlayingCard height={ 150 } card={this.props.bottom_card} flipped={this.state.winner!=null} elevateOnClick={true} />
+                  <PlayingCard height={ 150 } card={this.props.bottom_card} flipped={this.getFlipped()} elevateOnClick={true} />
                </div>
           )
        }
@@ -126,7 +150,7 @@ class Trick extends Component {
        if (this.props.top_card){
            return (
                 <div id='top_card' style={this._getCardPositions().top}>
-                   <PlayingCard height={ 150 } card={this.props.top_card} flipped={(this.state.winner!=null)} elevateOnClick={true} />
+                   <PlayingCard height={ 150 } card={this.props.top_card} flipped={(this.getFlipped())} elevateOnClick={true} />
                 </div>
           )
       }
@@ -139,7 +163,7 @@ class Trick extends Component {
 
         setTimeout(() => {
           this.setState({winner: this.props.winner});
-        }, 2500)
+        }, 3500)
     }
 
 
@@ -172,6 +196,7 @@ Trick.propTypes = {
     top_card: PropTypes.string,
     right_card: PropTypes.string,
     winner: PropTypes.string,
+    previous_trick: PropTypes.bool,
 }
 
 export default Trick;
