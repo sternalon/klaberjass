@@ -121,8 +121,8 @@ renderButton() {
 }
 
 Scoreboard.propTypes = {
-    score1: PropTypes.string,
-    score2: PropTypes.string,
+    score1: PropTypes.number,
+    score2: PropTypes.number,
     team1: PropTypes.string,
     team2: PropTypes.string,
 }
