@@ -136,7 +136,7 @@ class SeriesBoard extends React.Component {
     }
 
     renderGameBoard(){
-        console.log("QQQQQ", this.state.series.score1)
+        console.log("QQQQQ", this.state.series.score1, this.state.series.score2)
         return (
             <div >
                     <GameBoard current_user={this.props.current_user} game_id={this.state.series.current_game} socket = {this.props.socket}

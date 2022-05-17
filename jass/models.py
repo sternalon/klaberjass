@@ -66,6 +66,12 @@ class Series(models.Model):
         else:
             return None
 
+    def update_scores(self):
+        games = Game.objects.filter(series=self).order_by('number')
+        self.score1 = sum([game.score1 for game in games])
+        self.score2 = sum([game.score2 for game in games])
+        self.save()
+
 
 
 class SeriesPlayer(models.Model):
@@ -105,15 +111,17 @@ class Game(models.Model):
         series = Series.get_by_id(series_id)
 
         if len(Game.objects.filter(series=series, completed=False))>0:
-            return "Series game in progress"
+            return False
         else:
             game = Game.objects.create()
             game.series = series
             game.game_type = series.game_type
             game.number = len(Game.objects.filter(series=series, completed=True)) + 1
             users = series.get_users_in_series()
+            game.series.update_scores()
             game.begin(users)
             game.save()
+            return True
 
     def begin(self, users):
         self._set_players(users)
@@ -196,6 +204,7 @@ class Game(models.Model):
     def update_points_and_scores(self):
         self.calculate_points()
         self.calculate_scores()
+        self.series.update_scores()
 
     def calculate_points(self):
         self.points1 =  self.calculate_player_points(position=1) + self.calculate_player_points(position=3)

@@ -30,6 +30,13 @@ def send_game_update(game):
     layer = get_channel_layer()
     async_to_sync(layer.group_send)(series_channel, {"type": "series.send", 'text': json.dumps(game_serialized.data)})
 
+def send_series_update(series):
+    series_serialized = SeriesSerializer(series)
+    series_channel = 'series-{0}'.format(series.id)
+
+    layer = get_channel_layer()
+    async_to_sync(layer.group_send)(series_channel, {"type": "series.send", 'text': json.dumps(series_serialized.data)})
+
 
 @receiver(post_save, sender=Series)
 def new_series_handler(**kwargs):

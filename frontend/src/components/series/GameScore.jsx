@@ -75,8 +75,8 @@ class GameScore extends Component {
         </tr>
         <tr>
             <td style={{"height":" 50px", "width":" 160px", "textAlign": "center", "fontSize": "20px"}}>{"Series Score"}</td>
-            <td style={{"height":" 50px", "textAlign": "center", "fontSize": "20px"}}>{this.props.series_score1 + this.props.score1}</td>
-            <td style={{"height":" 50px", "textAlign": "center", "fontSize": "20px"}}>{this.props.series_score2 + this.props.score2}</td>
+            <td style={{"height":" 50px", "textAlign": "center", "fontSize": "20px"}}>{this.props.series_score1}</td>
+            <td style={{"height":" 50px", "textAlign": "center", "fontSize": "20px"}}>{this.props.series_score2}</td>
         </tr>
 
     </tbody>
