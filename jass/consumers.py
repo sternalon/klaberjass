@@ -91,7 +91,6 @@ class SeriesConsumer(JsonWebsocketConsumer):
             # create the next game in the series
             Game.create_game_from_series(series_id)
             series = Series.get_by_id(series_id)
-            print("BBBBB", series.id)
 
         if action == 'play_card':
             game_id = content['game_id']

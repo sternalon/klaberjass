@@ -5,6 +5,7 @@ import Websocket from 'react-websocket'
 import Hand from "./react-playing-cards/src/PlayingCard/Hand/Hand";
 import Trick from './Trick'
 import PreviousTrick from './PreviousTrick'
+import GameScore from './GameScore'
 
 
 
@@ -23,7 +24,8 @@ class GameBoard extends React.Component {
             right_hand: null,
             top_hand: null,
             hand:  null,
-            previous_trick:  null
+            previous_trick:  null,
+            completed:  false
 ,
         }
 
@@ -32,6 +34,11 @@ class GameBoard extends React.Component {
 //         this.isPlayerTurn = this.isPlayerTurn.bind(this)
 
     }
+
+    closeGameOnClick(){
+        console.log("Sending message to close the game")
+        this.sendSocketMessage({action: "create_game", series_id: this.state.game.series.id})
+     }
 
     onDoubleClick(card){
             var card_dict = this.convertStringToCard(card)
@@ -73,6 +80,7 @@ class GameBoard extends React.Component {
         var ordered_players = this.orderPlayers(game.players)
         this.setState({
                 game: game,
+                game_id: game.id,
                 current_player: ordered_players[0],
                 players: ordered_players,
                 hand: this.unplayedCards(ordered_players[0].hand),
@@ -87,7 +95,7 @@ class GameBoard extends React.Component {
                     },
                previous_trick : this.orderCardsInTrick(game.previous_trick.cards, ordered_players)
             })
-            console.log("Current Game State", this.state)
+            console.log("Current Game State !", this.state)
     }
 
 
@@ -300,14 +308,68 @@ class GameBoard extends React.Component {
 
 
 
+    updateGameComplete(){
+        setTimeout(() => {
+          if (this.state.game.completed){
+            if (this.state.game.completed == true){
+              this.setState({completed: this.state.game.completed})
+            }
+          };
+        }, 6000)
+    }
+
+
+    renderGameScore(){
+
+    if (this.state.completed==true){
+
+        if (this.state.players!=null){
+
+            var team1 = this.state.players[0].username.concat(" & " , this.state.players[2].username)
+            var team2 = this.state.players[1].username.concat(" & " , this.state.players[3].username)
+
+
+        return (
+            <div >
+{/*                     <GameScore score1={this.state.series.score1} score2={this.state.series.score2} team1={team1} team2={team2}/> */}
+                    <GameScore score1={this.state.game.score1} score2={this.state.game.score2}
+                               points1={this.state.game.points1} points2={this.state.game.points2}
+                               series_score1={this.props.series_score1} series_score2={this.props.series_score2}
+                               team1={team1} team2={team2} onClick={this.closeGameOnClick.bind(this)} />
+            </div>
+        )}
+       }
+    }
+
+    renderCards(){
+        var game_completed = false
+
+        if (this.state.completed){
+            if (this.state.game.completed == true){
+                game_completed = true
+            }
+        }
+
+        if (game_completed == false){
+        return(
+            <div >
+                {this.renderHands()}
+                {this.renderTrick()}
+                {this.renderPreviousTrick()}
+            </div>
+            )
+        }
+    }
+
+
     render() {
+//         console.log("Current GameBoard State Again", this.state)
+        this.updateGameComplete()
         return (
             <div >
 
-
-                   {this.renderHands()}
-                   {this.renderTrick()}
-                   {this.renderPreviousTrick()}
+                   {this.renderCards()}
+                   {this.renderGameScore()}
 
 
             <Websocket ref="socket" url={this.props.socket}
@@ -321,6 +383,8 @@ class GameBoard extends React.Component {
 GameBoard.propTypes = {
     current_user: PropTypes.object,
     game_id: PropTypes.number,
+    series_score1: PropTypes.number,
+    series_score2: PropTypes.number,
     socket: PropTypes.string
 }
 

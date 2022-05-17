@@ -29,13 +29,6 @@ class PreviousTrick extends Component {
 
   }
 
-    //   componentWillMount() {
-    //     Modal.setAppElement('body');
-    // }
-
-     componentWillUnmount() {
-        this.serverRequest.abort();
-    }
 
  renderBody(){
     return(

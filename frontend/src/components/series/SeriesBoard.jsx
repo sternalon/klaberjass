@@ -15,7 +15,6 @@ class SeriesBoard extends React.Component {
             series: null,
             position: null,
             users: null,
-            current_game: null,
             current_user: props.current_user,
             hand: {
                 cards: ["2d", "2c", "2s", "2h", "2d", "2c", "2s", "2h"],
@@ -137,10 +136,12 @@ class SeriesBoard extends React.Component {
     }
 
     renderGameBoard(){
+        console.log("QQQQQ", this.state.series.score1)
         return (
             <div >
                     <GameBoard current_user={this.props.current_user} game_id={this.state.series.current_game} socket = {this.props.socket}
-                                 sendSocketMessage={this.sendSocketMessage} />
+                                 sendSocketMessage={this.sendSocketMessage} series_score1={this.state.series.score1}
+                                 series_score2={this.state.series.score2} />
             </div>
         )
     }
@@ -178,7 +179,7 @@ class SeriesBoard extends React.Component {
 
 
     render() {
-        console.log("AAAAAQ", this.state)
+        console.log("AAAAAR", this.state)
         return (
             <div className="row">
 

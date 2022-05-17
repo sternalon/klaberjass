@@ -88,7 +88,7 @@ class JassScorer():
     rank = {"seven": 1, "eight": 2, "nine": 3, "jack": 4, "queen": 5, "king": 6, "ten": 7, "ace": 8}
     trump_rank = {"seven": 11, "eight": 12, "queen": 13, "king": 14, "ten": 15, "ace": 16, "nine": 17, "jack": 18}
     value = {"seven": 0, "eight": 0, "nine": 0, "jack": 2, "queen": 3, "king": 4, "ten": 10, "ace": 11}
-    trump_value = {"seven": 0, "eight": 0, "queen": 3, "king": 4, "ten": 10, "ace": 11, "nine": 14, "jack": 20}
+    trump_value = {"seven": 0, "eight": 0, "queen": 3, "king": 4, "ten": 10, "ace": 11, "nine": 14, "jack": 22}
 
     def __init__(self, trump):
         self.trump = trump

@@ -29,7 +29,9 @@ class Trick extends Component {
 //     }
 
      componentWillUnmount() {
-        this.serverRequest.abort();
+        if (this.timeout) {
+            clearTimeout(this.timeout)
+        }
     }
 
     _getOpenTrickPosition(){
@@ -161,9 +163,19 @@ class Trick extends Component {
 
    updateWinner(){
 
-        setTimeout(() => {
+
+        this.timeout = setTimeout(() => {
           this.setState({winner: this.props.winner});
+//           this.timeout = null
         }, 3500)
+
+
+
+//        if (this.timeout) {
+//           clearTimeout(this.timeout)
+//           this.timeout = null
+//         }
+
     }
 
 
