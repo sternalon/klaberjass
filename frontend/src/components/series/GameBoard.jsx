@@ -104,14 +104,18 @@ class GameBoard extends React.Component {
                     number: game.current_trick.number
                     },
                previous_trick : this.orderCardsInTrick(game.previous_trick.cards, ordered_players),
-               game_completed: this.isGameCompleted(this.state.game_completed , game.completed)
+               game_completed: this.isGameCompleted(this.state.game_completed , game.completed, game.current_trick.winner)
             })
             console.log("Current Game State !", this.state)
     }
 
 
-    isGameCompleted(current_value, new_value){
-        return (current_value || new_value)
+    isGameCompleted(current_value, new_value, winner){
+        if (winner){
+            return (current_value || new_value)
+        }else {
+            return (new_value)
+        }
     }
 
 
