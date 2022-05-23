@@ -53,6 +53,7 @@ class SeriesBoard extends React.Component {
 
     // custom methods
     getSeries(){
+         console.log("Updating series information")
          const series_url = 'http://127.0.0.1:8000/series-from-id/' + this.props.series_id
          this.serverRequest = $.get(series_url, function (result) {
             this.setState({
@@ -136,7 +137,6 @@ class SeriesBoard extends React.Component {
     }
 
     renderGameBoard(){
-        console.log("QQQQQ", this.state.series.score1, this.state.series.score2)
         return (
             <div >
                     <GameBoard current_user={this.props.current_user} game_id={this.state.series.current_game} socket = {this.props.socket}
@@ -177,9 +177,33 @@ class SeriesBoard extends React.Component {
         }
     }
 
+    updateStateWitheResult(game_result){
+        var series =  this.state.series
+        if (game_result){
+            if (game_result.series){
+                series.score1 = game_result.series.score1
+                series.score2 = game_result.series.score2
+                series.current_game = game_result.id
+
+                this.setState({
+                    series: series
+                })
+            }
+
+        }
+    }
+
+
+    handleData(data) {
+        //receives messages from the connected websocket
+        let result = JSON.parse(data)
+//         console.log("Incoming Series Data !!!!!!!", result)
+        this.updateStateWitheResult(result)
+    }
+
 
     render() {
-        console.log("AAAAAR", this.state)
+        console.log("Current SeriesBoard State", this.state)
         return (
             <div className="row">
 
@@ -187,6 +211,8 @@ class SeriesBoard extends React.Component {
                    {this.renderDealOrLoading()}
                    {this.renderScoreboard()}
 
+           <Websocket ref="socket" url={this.props.socket}
+                    onMessage={this.handleData.bind(this)} reconnect={true}/>
 
 
             </div>

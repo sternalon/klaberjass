@@ -25,8 +25,8 @@ class GameBoard extends React.Component {
             top_hand: null,
             hand:  null,
             previous_trick:  null,
-            completed:  false
-,
+            game_completed:  false,
+            end_game_popup:  false
         }
 
         // bind button click
@@ -36,8 +36,17 @@ class GameBoard extends React.Component {
     }
 
     closeGameOnClick(){
-        console.log("Sending message to close the game")
+        console.log("YYYYY", this.state)
+        this.setState({
+            game_completed:  false,
+            end_game_popup:  false
+            })
+        console.log("Sending message to close the game", this.state.game.series.id)
         this.sendSocketMessage({action: "create_game", series_id: this.state.game.series.id})
+//         this.setState({
+//             game_completed:  false,
+//             end_game_popup:  false
+//             })
      }
 
     onDoubleClick(card){
@@ -55,6 +64,7 @@ class GameBoard extends React.Component {
     componentDidMount() {
         this.getGame()
     }
+
 
 
     componentWillUnmount() {
@@ -93,12 +103,16 @@ class GameBoard extends React.Component {
                     closed: game.current_trick.closed,
                     number: game.current_trick.number
                     },
-               previous_trick : this.orderCardsInTrick(game.previous_trick.cards, ordered_players)
+               previous_trick : this.orderCardsInTrick(game.previous_trick.cards, ordered_players),
+               game_completed: this.isGameCompleted(this.state.game_completed , game.completed)
             })
             console.log("Current Game State !", this.state)
     }
 
 
+    isGameCompleted(current_value, new_value){
+        return (current_value || new_value)
+    }
 
 
     // custom methods
@@ -309,19 +323,22 @@ class GameBoard extends React.Component {
 
 
     updateGameComplete(){
+
         setTimeout(() => {
-          if (this.state.game.completed){
-            if (this.state.game.completed == true){
-              this.setState({completed: this.state.game.completed})
+          if (this.state.game_completed){
+            if (this.state.game_completed == true){
+              this.setState({end_game_popup: this.state.game_completed})
             }
           };
         }, 6000)
+
+
     }
 
 
     renderGameScore(){
 
-    if (this.state.completed==true){
+    if (this.state.end_game_popup==true){
 
         if (this.state.players!=null){
 
@@ -363,7 +380,7 @@ class GameBoard extends React.Component {
 
 
     render() {
-//         console.log("Current GameBoard State Again", this.state)
+        console.log("Current GameBoard State", this.state)
         this.updateGameComplete()
         return (
             <div >

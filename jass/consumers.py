@@ -93,7 +93,8 @@ class SeriesConsumer(JsonWebsocketConsumer):
             series = Series.get_by_id(series_id)
 
             if game_created:
-                signals.send_series_update(series)
+                game = series.get_current_game()
+                signals.send_game_update(game)
 
         if action == 'play_card':
             game_id = content['game_id']

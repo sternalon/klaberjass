@@ -417,6 +417,22 @@ class PlayingCard(models.Model):
         turn = self.player.get_turn(trick)
         return turn.validate_play(self.card)
 
+    def unplay_card(self):
+
+        #Updating Trick
+        self.trick.closed = False
+        self.trick.winner = None
+        self.trick.save()
+
+        # Updating Card
+        self.played = False
+        self.trick = None
+        self.save()
+
+        #Updating Game
+        self.game.completed = False
+        self.game.save()
+
 
 class Bid(models.Model):
     SUITS = [("spade", 'Spade'), ("heart", 'Heart'), ("diamond", 'Diamond'), ("club", 'Club')]

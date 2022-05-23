@@ -31,24 +31,12 @@ class GameScore extends Component {
     //     Modal.setAppElement('body');
     // }
 
-     componentWillUnmount() {
-        this.serverRequest.abort();
-    }
+
 
 
  onClick(){
-
-    console.log("On Click, follow my instructions 2")
-    console.log("DDDDD", this.props)
-
     this.setState({modalIsOpen: "none"})
-
     this.props.onClick()
-
-//     closeModal.bind(this).bind(this)
-
-    console.log("EEEEE", this.state)
-
   }
 
  renderBody(){
@@ -118,6 +106,8 @@ class GameScore extends Component {
 
   );
 }
+
+
 
 
 

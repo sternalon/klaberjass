@@ -163,7 +163,6 @@ class Trick extends Component {
 
    updateWinner(){
 
-
         this.timeout = setTimeout(() => {
           this.setState({winner: this.props.winner});
 //           this.timeout = null
