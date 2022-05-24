@@ -89,9 +89,12 @@ class SeriesConsumer(JsonWebsocketConsumer):
         if action == 'create_game':
             series_id = self.scope["url_route"]["kwargs"]["series_id"]
             # create the next game in the series
-            Game.create_game_from_series(series_id)
+            game_created = Game.create_game_from_series(series_id)
             series = Series.get_by_id(series_id)
-            print("BBBBB", series.id)
+
+            if game_created:
+                game = series.get_current_game()
+                signals.send_game_update(game)
 
         if action == 'play_card':
             game_id = content['game_id']

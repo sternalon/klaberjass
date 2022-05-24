@@ -4,7 +4,7 @@ import $ from 'jquery'
 import Websocket from 'react-websocket'
 import Hand from "./react-playing-cards/src/PlayingCard/Hand/Hand";
 import GameBoard from './GameBoard'
-// import GameSquare from './GameSquare'
+import Scoreboard from './Scoreboard'
 
 
 class SeriesBoard extends React.Component {
@@ -15,7 +15,6 @@ class SeriesBoard extends React.Component {
             series: null,
             position: null,
             users: null,
-            current_game: null,
             current_user: props.current_user,
             hand: {
                 cards: ["2d", "2c", "2s", "2h", "2d", "2c", "2s", "2h"],
@@ -54,6 +53,7 @@ class SeriesBoard extends React.Component {
 
     // custom methods
     getSeries(){
+         console.log("Updating series information")
          const series_url = 'http://127.0.0.1:8000/series-from-id/' + this.props.series_id
          this.serverRequest = $.get(series_url, function (result) {
             this.setState({
@@ -140,9 +140,24 @@ class SeriesBoard extends React.Component {
         return (
             <div >
                     <GameBoard current_user={this.props.current_user} game_id={this.state.series.current_game} socket = {this.props.socket}
-                                 sendSocketMessage={this.sendSocketMessage} />
+                                 sendSocketMessage={this.sendSocketMessage} series_score1={this.state.series.score1}
+                                 series_score2={this.state.series.score2} />
             </div>
         )
+    }
+
+    renderScoreboard(){
+        if (this.state.users!=null){
+
+            var team1 = this.state.users[0].username.concat(" & " , this.state.users[2].username)
+            var team2 = this.state.users[1].username.concat(" & " , this.state.users[3].username)
+
+
+        return (
+            <div >
+                    <Scoreboard score1={this.state.series.score1} score2={this.state.series.score2} team1={team1} team2={team2}/>
+            </div>
+        )}
     }
 
     renderDealOrLoading() {
@@ -162,14 +177,42 @@ class SeriesBoard extends React.Component {
         }
     }
 
+    updateStateWitheResult(game_result){
+        var series =  this.state.series
+        if (game_result){
+            if (game_result.series){
+                series.score1 = game_result.series.score1
+                series.score2 = game_result.series.score2
+                series.current_game = game_result.id
+
+                this.setState({
+                    series: series
+                })
+            }
+
+        }
+    }
+
+
+    handleData(data) {
+        //receives messages from the connected websocket
+        let result = JSON.parse(data)
+//         console.log("Incoming Series Data !!!!!!!", result)
+        this.updateStateWitheResult(result)
+    }
+
 
     render() {
+        console.log("Current SeriesBoard State", this.state)
         return (
             <div className="row">
 
                    {this.renderNames()}
                    {this.renderDealOrLoading()}
+                   {this.renderScoreboard()}
 
+           <Websocket ref="socket" url={this.props.socket}
+                    onMessage={this.handleData.bind(this)} reconnect={true}/>
 
 
             </div>

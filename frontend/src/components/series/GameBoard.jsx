@@ -4,6 +4,11 @@ import $ from 'jquery'
 import Websocket from 'react-websocket'
 import Hand from "./react-playing-cards/src/PlayingCard/Hand/Hand";
 import Trick from './Trick'
+import PreviousTrick from './PreviousTrick'
+import GameScore from './GameScore'
+
+
+
 
 
 class GameBoard extends React.Component {
@@ -19,6 +24,9 @@ class GameBoard extends React.Component {
             right_hand: null,
             top_hand: null,
             hand:  null,
+            previous_trick:  null,
+            game_completed:  false,
+            end_game_popup:  false
         }
 
         // bind button click
@@ -26,6 +34,20 @@ class GameBoard extends React.Component {
 //         this.isPlayerTurn = this.isPlayerTurn.bind(this)
 
     }
+
+    closeGameOnClick(){
+        console.log("YYYYY", this.state)
+        this.setState({
+            game_completed:  false,
+            end_game_popup:  false
+            })
+        console.log("Sending message to close the game", this.state.game.series.id)
+        this.sendSocketMessage({action: "create_game", series_id: this.state.game.series.id})
+//         this.setState({
+//             game_completed:  false,
+//             end_game_popup:  false
+//             })
+     }
 
     onDoubleClick(card){
             var card_dict = this.convertStringToCard(card)
@@ -42,6 +64,7 @@ class GameBoard extends React.Component {
     componentDidMount() {
         this.getGame()
     }
+
 
 
     componentWillUnmount() {
@@ -67,6 +90,7 @@ class GameBoard extends React.Component {
         var ordered_players = this.orderPlayers(game.players)
         this.setState({
                 game: game,
+                game_id: game.id,
                 current_player: ordered_players[0],
                 players: ordered_players,
                 hand: this.unplayedCards(ordered_players[0].hand),
@@ -78,12 +102,21 @@ class GameBoard extends React.Component {
                     winner: this.winnerDirection(game.current_trick.winner, ordered_players),
                     closed: game.current_trick.closed,
                     number: game.current_trick.number
-                    }
+                    },
+               previous_trick : this.orderCardsInTrick(game.previous_trick.cards, ordered_players),
+               game_completed: this.isGameCompleted(this.state.game_completed , game.completed, game.current_trick.winner)
             })
-            console.log("Current Game State", this.state)
+            console.log("Current Game State !", this.state)
     }
 
 
+    isGameCompleted(current_value, new_value, winner){
+        if (winner){
+            return (current_value || new_value)
+        }else {
+            return (new_value)
+        }
+    }
 
 
     // custom methods
@@ -267,28 +300,97 @@ class GameBoard extends React.Component {
       );
   }
 
-//     currentTurn(){
-//         if (this.state.game){
-//             if (this.state.game.completed != null){
-//                 // game is over
-//                 return <h3>The Winner: <span className="text-primary">{(this.state.game.current_turn.username)}</span></h3>
-//             }else{
-//                 return <h3>Current Turn:
-//                     <span className="text-primary">{(this.state.game.current_turn.username)}</span>
-//                  </h3>
-//             }
-//
-//         }
-//     }
+  trickHasCards(trick){
+    if (trick==null){
+        return false
+        }
+    if (trick.every(element => element === null)){
+        return false
+    } else {
+    return true
+    }
+  }
+
+
+  renderPreviousTrick(){
+        var previous_trick = this.state.previous_trick
+
+        if (this.trickHasCards(previous_trick)){
+                return (
+                    <div >
+                        <PreviousTrick bottom_card = {previous_trick[0]} left_card = {previous_trick[1]} top_card = {previous_trick[2]} right_card = {previous_trick[3]}  />
+                    </div>
+                )
+           }
+    }
+
+
+
+    updateGameComplete(){
+
+        setTimeout(() => {
+          if (this.state.game_completed){
+            if (this.state.game_completed == true){
+              this.setState({end_game_popup: this.state.game_completed})
+            }
+          };
+        }, 6000)
+
+
+    }
+
+
+    renderGameScore(){
+
+    if (this.state.end_game_popup==true){
+
+        if (this.state.players!=null){
+
+            var team1 = this.state.players[0].username.concat(" & " , this.state.players[2].username)
+            var team2 = this.state.players[1].username.concat(" & " , this.state.players[3].username)
+
+
+        return (
+            <div >
+{/*                     <GameScore score1={this.state.series.score1} score2={this.state.series.score2} team1={team1} team2={team2}/> */}
+                    <GameScore score1={this.state.game.score1} score2={this.state.game.score2}
+                               points1={this.state.game.points1} points2={this.state.game.points2}
+                               series_score1={this.props.series_score1} series_score2={this.props.series_score2}
+                               team1={team1} team2={team2} onClick={this.closeGameOnClick.bind(this)} />
+            </div>
+        )}
+       }
+    }
+
+    renderCards(){
+        var game_completed = false
+
+        if (this.state.completed){
+            if (this.state.game.completed == true){
+                game_completed = true
+            }
+        }
+
+        if (game_completed == false){
+        return(
+            <div >
+                {this.renderHands()}
+                {this.renderTrick()}
+                {this.renderPreviousTrick()}
+            </div>
+            )
+        }
+    }
 
 
     render() {
+        console.log("Current GameBoard State", this.state)
+        this.updateGameComplete()
         return (
             <div >
 
-
-                   {this.renderHands()}
-                   {this.renderTrick()}
+                   {this.renderCards()}
+                   {this.renderGameScore()}
 
 
             <Websocket ref="socket" url={this.props.socket}
@@ -298,10 +400,14 @@ class GameBoard extends React.Component {
     }
 }
 
+
 GameBoard.propTypes = {
     current_user: PropTypes.object,
     game_id: PropTypes.number,
+    series_score1: PropTypes.number,
+    series_score2: PropTypes.number,
     socket: PropTypes.string
 }
 
 export default GameBoard
+

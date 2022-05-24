@@ -66,6 +66,12 @@ class Series(models.Model):
         else:
             return None
 
+    def update_scores(self):
+        games = Game.objects.filter(series=self).order_by('number')
+        self.score1 = sum([game.score1 for game in games])
+        self.score2 = sum([game.score2 for game in games])
+        self.save()
+
 
 
 class SeriesPlayer(models.Model):
@@ -91,6 +97,10 @@ class Game(models.Model):
     number = models.SmallIntegerField(null=True)
     created = models.DateTimeField(auto_now_add=True)
     modified = models.DateTimeField(auto_now=True)
+    points1 = models.IntegerField(null=True)
+    points2 = models.IntegerField(null=True)
+    score1 = models.IntegerField(null=True)
+    score2 = models.IntegerField(null=True)
 
     @staticmethod
     def get_by_id(id):
@@ -101,15 +111,17 @@ class Game(models.Model):
         series = Series.get_by_id(series_id)
 
         if len(Game.objects.filter(series=series, completed=False))>0:
-            return "Series game in progress"
+            return False
         else:
             game = Game.objects.create()
             game.series = series
             game.game_type = series.game_type
             game.number = len(Game.objects.filter(series=series, completed=True)) + 1
             users = series.get_users_in_series()
+            game.series.update_scores()
             game.begin(users)
             game.save()
+            return True
 
     def begin(self, users):
         self._set_players(users)
@@ -152,11 +164,13 @@ class Game(models.Model):
     def get_tricks(self):
         return list(Trick.objects.filter(game=self).order_by('number'))
 
+
     def get_current_or_next_trick(self):
         trick = self.get_current_trick()
         if trick.winner:
             trick.closed = True
             trick.save()
+            self.update_points_and_scores()
             trick = self.get_current_trick()
         return trick
 
@@ -181,6 +195,52 @@ class Game(models.Model):
     def get_trick_rules(self):
         config = GameConfig(self.game_type)
         return config.trick
+
+    def get_scorer(self):
+        config = GameConfig(self.game_type)
+        return config.scorer(self.trumps)
+
+
+    def update_points_and_scores(self):
+        self.calculate_points()
+        self.calculate_scores()
+        self.series.update_scores()
+
+    def calculate_points(self):
+        self.points1 =  self.calculate_player_points(position=1) + self.calculate_player_points(position=3)
+        self.points2 =  self.calculate_player_points(position=2) + self.calculate_player_points(position=4)
+        self.save()
+
+    def calculate_player_points(self, position):
+        player = Player.objects.get(game=self, position = position)
+        tricks = list(Trick.objects.filter(game=self, winner=player))
+        tricks_list = [trick.get_card_list() for trick in tricks]
+        scorer = self.get_scorer()
+        return scorer.get_points_from_tricks(tricks_list)
+
+    def calculate_scores(self):
+        if self.completed:
+            # TODO: Update code to correctly find who took on.
+            taken_on = "team1"
+
+            self.score1 = self.points1
+            self.score2 = self.points2
+
+            if taken_on == "team1" and (self.points1 <= self.points2):
+                self.score1 = 0
+                self.score1 = self.points1 + self.points2
+            if taken_on == "team2" and (self.points2 <= self.points1):
+                self.score1 = 0
+                self.score1 = self.points1 + self.points2
+            self.save()
+
+    def complete_or_pass(self):
+        config = GameConfig(self.game_type)
+        number_completed_tricks = len(list(Trick.objects.filter(game=self).exclude(winner=None)))
+        if number_completed_tricks == config.num_tricks:
+            self.completed = True
+            self.save()
+            self.update_points_and_scores()
 
 
 
@@ -266,6 +326,10 @@ class Trick(models.Model):
     def get_playing_cards(self):
         return list(PlayingCard.objects.filter(trick=self).order_by('order_in_trick'))
 
+    def get_card_list(self):
+        playing_cards = self.get_playing_cards()
+        return [playing_card.card for playing_card in playing_cards]
+
     def num_cards_played(self):
         return len(self.get_playing_cards())
 
@@ -280,6 +344,7 @@ class Trick(models.Model):
     def set_winner_or_pass(self):
         if self.num_cards_played() == self.game.get_num_players():
             self.set_winner()
+            self.game.complete_or_pass()
 
     def close_or_pass(self):
         if self.winner:
@@ -294,6 +359,8 @@ class Trick(models.Model):
         winning_card = trick_rules.get_winner()
         self.winner = PlayingCard.objects.get(card=winning_card.as_number(), trick=self).player
         self.save()
+
+
 
 class PlayingCard(models.Model):
     card = CardField()
@@ -349,6 +416,22 @@ class PlayingCard(models.Model):
     def _validate_play(self, trick):
         turn = self.player.get_turn(trick)
         return turn.validate_play(self.card)
+
+    def unplay_card(self):
+
+        #Updating Trick
+        self.trick.closed = False
+        self.trick.winner = None
+        self.trick.save()
+
+        # Updating Card
+        self.played = False
+        self.trick = None
+        self.save()
+
+        #Updating Game
+        self.game.completed = False
+        self.game.save()
 
 
 class Bid(models.Model):

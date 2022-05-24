@@ -42,7 +42,7 @@ def new_series_handler(**kwargs):
         send_available_series_update()
 
 @receiver(post_save, sender=SeriesPlayer)
-def new_series_handler(**kwargs):
+def new_seriesplayer_handler(**kwargs):
     """
     When a new series player is created, this builds a list of all open series and
     sends it down to all channels in the 'lobby' group.
@@ -54,16 +54,17 @@ def new_series_handler(**kwargs):
 
 
 @receiver(post_save, sender=Game)
-def new_series_handler(sender, instance, **kwargs):
+def new_game_handler(sender, instance, **kwargs):
     """
     When a game is updated, update is sent to the 'series' group.
     """
     game = instance
-    send_game_update(game)
+    if game.series:
+        send_game_update(game)
 
 
 @receiver(post_save, sender=PlayingCard)
-def new_series_handler(sender, instance, **kwargs):
+def new_playingcard_handler(sender, instance, **kwargs):
     """
     When a game is updated, update is sent to the 'series' group.
     """
@@ -71,11 +72,19 @@ def new_series_handler(sender, instance, **kwargs):
     send_game_update(game)
 
 @receiver(post_save, sender=Trick)
-def new_series_handler(sender, instance, **kwargs):
+def new_trick_handler(sender, instance, **kwargs):
     """
     When a game is updated, update is sent to the 'series' group.
     """
     game = instance.game
     send_game_update(game)
 
-
+@receiver(post_save, sender=Series)
+def new_single_series_handler(sender, instance, **kwargs):
+    """
+    When a game is updated, update is sent to the 'series' group.
+    """
+    series = instance
+    game = series.get_current_game()
+    if game:
+        send_game_update(game)
