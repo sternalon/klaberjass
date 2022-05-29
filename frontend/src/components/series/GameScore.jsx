@@ -39,9 +39,40 @@ class GameScore extends Component {
     this.props.onClick()
   }
 
+
+  calculateResult(score1, score2){
+
+    console.log("Score", score1, score2)
+    if ((score1) > 1000 || score2 > 1000){
+        const margin = Math.abs(score1-score2)
+        if (score1 > score2){
+            return (this.props.team1 + " won by " + margin + " points")
+        } else if (score1 < score2){
+            return (this.props.team2 + " won by " + margin + " points")
+        } else {
+            return ("Game Tied")
+        }
+    }
+
+
+  }
+
+  renderResult(score1, score2){
+
+    const result = this.calculateResult(score1, score2)
+    if (result){
+        return(
+            <div>
+                <h1 style={{"color":"blue", "textAlign": "center"}}>Game Over!</h1>
+                <p style={{"color":"black", "textAlign": "center"}}> {result} </p>
+            </div>
+        )
+       }
+  }
+
  renderBody(){
     return(
-        <div className="modal-body" style={{"height":" 300px", "backgroundColor": "White", "marginTop": "2cm"}}>
+        <div className="modal-body" style={{"height":" 350px", "backgroundColor": "White", "marginTop": "2cm"}}>
 
            <table width="550" >
 
@@ -70,6 +101,7 @@ class GameScore extends Component {
     </tbody>
 </table>
 
+            {this.renderResult(this.props.series_score1, this.props.series_score2)}
 
         </div>
 
