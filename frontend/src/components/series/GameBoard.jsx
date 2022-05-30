@@ -85,8 +85,16 @@ class GameBoard extends React.Component {
             right:{'bottom': '40%','left': '90%', 'position': 'absolute', 'transform': 'rotate(270deg)' }
             }
            }
+    checkSeriesComplete(game){
+        if (game.series){
+            if (game.series.completed == true){
+                window.location.href = '/lobby';
+            }
+        }
+    }
 
     setStateWithGameResult(game){
+        this.checkSeriesComplete(game)
         var ordered_players = this.orderPlayers(game.players)
         this.setState({
                 game: game,
@@ -384,7 +392,7 @@ class GameBoard extends React.Component {
 
 
     render() {
-        console.log("Current GameBoard State", this.state)
+        //console.log("Current GameBoard State", this.state)
         this.updateGameComplete()
         return (
             <div >
