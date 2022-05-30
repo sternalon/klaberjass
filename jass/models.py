@@ -70,6 +70,8 @@ class Series(models.Model):
         games = Game.objects.filter(series=self).order_by('number')
         self.score1 = sum([game.score1 for game in games])
         self.score2 = sum([game.score2 for game in games])
+        if (self.score1 > 1000) or (self.score2 > 1000):
+            self.completed = True
         self.save()
 
 
@@ -109,8 +111,10 @@ class Game(models.Model):
     @staticmethod
     def create_game_from_series(series_id):
         series = Series.get_by_id(series_id)
-
-        if len(Game.objects.filter(series=series, completed=False))>0:
+        series.update_scores()
+        if series.completed is True:
+            return False
+        elif len(Game.objects.filter(series=series, completed=False))>0:
             return False
         else:
             game = Game.objects.create()
@@ -118,7 +122,6 @@ class Game(models.Model):
             game.game_type = series.game_type
             game.number = len(Game.objects.filter(series=series, completed=True)) + 1
             users = series.get_users_in_series()
-            game.series.update_scores()
             game.begin(users)
             game.save()
             return True

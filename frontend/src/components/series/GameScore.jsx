@@ -41,8 +41,6 @@ class GameScore extends Component {
 
 
   calculateResult(score1, score2){
-
-    console.log("Score", score1, score2)
     if ((score1) > 1000 || score2 > 1000){
         const margin = Math.abs(score1-score2)
         if (score1 > score2){
@@ -63,7 +61,7 @@ class GameScore extends Component {
     if (result){
         return(
             <div>
-                <h1 style={{"color":"blue", "textAlign": "center"}}>Game Over!</h1>
+                <h1 style={{"color":"blue", "textAlign": "center"}}>We have a winner!</h1>
                 <p style={{"color":"black", "textAlign": "center"}}> {result} </p>
             </div>
         )

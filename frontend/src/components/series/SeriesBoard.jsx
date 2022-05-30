@@ -181,6 +181,9 @@ class SeriesBoard extends React.Component {
         var series =  this.state.series
         if (game_result){
             if (game_result.series){
+                if (series.completed == true){
+                    window.location.href = '/lobby';
+                }
                 series.score1 = game_result.series.score1
                 series.score2 = game_result.series.score2
                 series.current_game = game_result.id
